@@ -21,18 +21,19 @@ const validateFeedback = [
     .withMessage('Invalid lawyer ID format'),
   
   body('rating')
+    .toInt()
     .isInt({ min: 1, max: 5 })
-    .withMessage('Rating must be between 1 and 5'),
+    .withMessage('Rating must be an integer between 1 and 5'),
   
   body('title')
     .trim()
-    .isLength({ min: 5, max: 100 })
-    .withMessage('Title must be between 5 and 100 characters'),
+    .isLength({ min: 3, max: 100 })
+    .withMessage('Title must be between 3 and 100 characters'),
   
   body('comment')
     .trim()
-    .isLength({ min: 10, max: 1000 })
-    .withMessage('Comment must be between 10 and 1000 characters'),
+    .isLength({ min: 5, max: 1000 })
+    .withMessage('Comment must be between 5 and 1000 characters'),
   
   body('serviceType')
     .optional()
@@ -44,11 +45,10 @@ const validateFeedback = [
 const validateResponse = [
   body('message')
     .trim()
-    .isLength({ min: 10, max: 500 })
-    .withMessage('Response message must be between 10 and 500 characters')
+    .isLength({ min: 5, max: 500 })
+    .withMessage('Response message must be between 5 and 500 characters')
 ];
 
-// Public routes
 // Create new feedback requires auth to bind to user
 router.post('/', protect, validateFeedback, createLawyerFeedback);
 

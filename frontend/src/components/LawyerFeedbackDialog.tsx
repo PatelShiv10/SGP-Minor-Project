@@ -81,7 +81,7 @@ const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
 
       const data = await response.json();
 
-      if (data.success) {
+      if (response.ok && data.success) {
         toast({
           title: "Review Submitted",
           description: "Thank you! Your review will be published after approval."
@@ -98,7 +98,10 @@ const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
         setOpen(false);
         onFeedbackSubmitted?.();
       } else {
-        throw new Error(data.message || 'Failed to submit review');
+        const message = data?.errors?.length
+          ? data.errors.map((e: any) => e.msg).join(', ')
+          : (data?.message || 'Failed to submit review');
+        throw new Error(message);
       }
     } catch (error: any) {
       toast({
