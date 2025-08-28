@@ -273,22 +273,7 @@ const LawyerClients = () => {
         )}
 
         {client.stats && (
-          <div className="grid grid-cols-3 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
-            <div className="text-center">
-              <p className="text-xs text-gray-500">Total Sessions</p>
-              <p className="font-semibold">{client.stats.totalAppointments}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xs text-gray-500">Billed</p>
-              <p className="font-semibold">{formatCurrency(client.totalBilled)}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xs text-gray-500">Outstanding</p>
-              <p className="font-semibold text-orange-600">
-                {formatCurrency(client.totalBilled - client.totalPaid)}
-              </p>
-            </div>
-          </div>
+          <></>
         )}
 
         {client.stats?.nextAppointment && (
@@ -301,12 +286,12 @@ const LawyerClients = () => {
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <Button
             size="sm"
             variant="outline"
             onClick={() => handleMessageClient(client)}
-            className="border-teal text-teal hover:bg-teal hover:text-white"
+            className="w-full border-teal text-teal hover:bg-teal hover:text-white"
           >
             <MessageCircle className="h-4 w-4 mr-1" />
             Chat
@@ -315,7 +300,7 @@ const LawyerClients = () => {
             size="sm"
             variant="outline"
             onClick={() => handleCallClient(client)}
-            className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
+            className="w-full border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
           >
             <Phone className="h-4 w-4 mr-1" />
             Call
@@ -324,7 +309,7 @@ const LawyerClients = () => {
             size="sm"
             variant="outline"
             onClick={() => handleViewDocuments(client)}
-            className="border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white"
+            className="w-full border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white"
           >
             <FileText className="h-4 w-4 mr-1" />
             Files
