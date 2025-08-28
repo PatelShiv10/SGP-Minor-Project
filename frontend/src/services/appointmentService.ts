@@ -280,15 +280,22 @@ export const appointmentService = {
 
 // Utility functions
 export const formatAppointmentTime = (start: string, end: string): string => {
-  const formatTime = (time: string) => {
+  const formatTime = (time?: string) => {
+    if (!time || typeof time !== 'string' || time.indexOf(':') === -1) {
+      return '--';
+    }
     const [hours, minutes] = time.split(':');
     const hour = parseInt(hours);
+    if (Number.isNaN(hour)) return '--';
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
+    const mins = (minutes ?? '00').padStart(2, '0');
+    return `${displayHour}:${mins} ${ampm}`;
   };
 
-  return `${formatTime(start)} - ${formatTime(end)}`;
+  const startStr = formatTime(start);
+  const endStr = formatTime(end);
+  return `${startStr} - ${endStr}`;
 };
 
 export const formatAppointmentDate = (dateString: string): string => {
