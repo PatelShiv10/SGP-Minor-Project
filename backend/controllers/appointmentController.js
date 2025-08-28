@@ -1,5 +1,6 @@
 const Booking = require('../models/Booking');
 const User = require('../models/User');
+const LawyerClient = require('../models/LawyerClient');
 const { validationResult } = require('express-validator');
 
 // @desc    Get all appointments for a lawyer
@@ -338,6 +339,17 @@ const updateAppointmentStatus = async (req, res) => {
     // Update based on status
     if (status === 'confirmed') {
       await appointment.confirm();
+      
+      // Auto-add client when appointment is confirmed
+      try {
+        await LawyerClient.addClientFromAppointment(lawyerId, appointment.userId, {
+          appointmentType: appointment.appointmentType,
+          date: appointment.date,
+          start: appointment.start
+        });
+      } catch (error) {
+        console.error('Failed to add client relationship on confirmation:', error);
+      }
     } else if (status === 'cancelled') {
       await appointment.cancel(reason, lawyerId);
     } else if (status === 'completed') {

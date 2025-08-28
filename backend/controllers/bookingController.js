@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Booking = require('../models/Booking');
+const LawyerClient = require('../models/LawyerClient');
 
 function toMinutes(hhmm) {
   const [h, m] = hhmm.split(':').map(Number);
@@ -117,6 +118,19 @@ exports.createBooking = async (req, res) => {
       meetingType: req.body.meetingType || 'video_call',
       clientNotes: req.body.notes || ''
     });
+
+    // Automatically add client to lawyer's client list
+    try {
+      await LawyerClient.addClientFromAppointment(lawyerId, userId, {
+        appointmentType: req.body.appointmentType || 'consultation',
+        date,
+        start
+      });
+    } catch (error) {
+      // Log error but don't fail the booking creation
+      console.error('Failed to add client relationship:', error);
+    }
+
     res.status(201).json({ success: true, message: 'Booking confirmed', data: booking });
   } catch (error) {
     if (error.code === 11000) {
