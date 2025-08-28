@@ -226,10 +226,9 @@ const LawyerReviews = () => {
             <h1 className="text-2xl lg:text-3xl font-bold text-navy mb-6">Reviews & Feedback</h1>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="reviews">All Reviews</TabsTrigger>
-                <TabsTrigger value="feedback">Feedback Management</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
@@ -390,73 +389,6 @@ const LawyerReviews = () => {
                         </div>
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="feedback" className="space-y-6">
-                <Card className="shadow-soft border-0">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-navy">Feedback Management</CardTitle>
-                    <p className="text-gray-600">Monitor and respond to client feedback</p>
-                  </CardHeader>
-                  <CardContent>
-                    {loadingFeedback ? (
-                      <div className="text-center py-8">
-                        <Loader2 className="h-6 w-6 animate-spin mx-auto text-teal" />
-                        <p className="text-gray-500 mt-2">Loading feedback...</p>
-                      </div>
-                    ) : feedback.length > 0 ? (
-                      <div className="space-y-4">
-                        {feedback.map((item, index) => (
-                          <div key={index} className="border border-gray-200 rounded-lg p-4">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <div className="flex">{renderStars(item.rating)}</div>
-                                  <span className="text-sm text-gray-600">
-                                    {item.clientName || 'Anonymous'}
-                                  </span>
-                                  <Badge variant={item.isApproved ? 'default' : 'secondary'}>
-                                    {item.isApproved ? 'Approved' : 'Pending'}
-                                  </Badge>
-                                </div>
-                                <h4 className="font-medium text-navy mb-1">{item.title}</h4>
-                                <p className="text-gray-700 text-sm">{item.comment}</p>
-                                <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                                  <span>{item.serviceType}</span>
-                                  <span>{new Date(item.createdAt).toLocaleDateString()}</span>
-                                </div>
-                                {item.response && (
-                                  <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                                    <p className="text-sm text-blue-800">
-                                      <strong>Your response:</strong> {item.response.message}
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                              {!item.response && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleRespondToReview(item)}
-                                  className="ml-4"
-                                >
-                                  <Reply className="h-4 w-4 mr-2" />
-                                  Respond
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                        <p>No feedback received yet.</p>
-                        <p className="text-sm">Client feedback will appear here once they submit reviews.</p>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
