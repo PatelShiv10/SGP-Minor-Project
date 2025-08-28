@@ -35,7 +35,6 @@ import LawyerProfile from "./pages/LawyerProfile";
 import LawyerPayments from "./pages/LawyerPayments";
 import LawyerReviews from "./pages/LawyerReviews";
 import LawyerSettings from "./pages/LawyerSettings";
-import LawyerFeedbackManagement from "./pages/LawyerFeedbackManagement";
 import OtpVerification from "./pages/OtpVerification";
 import AdminDashboard from "./pages/AdminDashboard";
 
