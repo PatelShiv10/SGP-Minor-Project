@@ -14,20 +14,35 @@ interface AuthContextType {
   login: (userData: User) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  authReady: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  // Initialize from localStorage synchronously to prevent redirect flash
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const storedUser = localStorage.getItem('currentUser');
+      const token = localStorage.getItem('token');
+      if (storedUser && token) {
+        return JSON.parse(storedUser) as User;
+      }
+    } catch {}
+    return null;
+  });
+  const [authReady, setAuthReady] = useState<boolean>(false);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('currentUser');
-    const token = localStorage.getItem('token');
-    
-    if (storedUser && token) {
-      setUser(JSON.parse(storedUser));
-    }
+    // In case SSR/hydration or other timing issues, confirm once on mount
+    try {
+      const storedUser = localStorage.getItem('currentUser');
+      const token = localStorage.getItem('token');
+      if (storedUser && token) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch {}
+    setAuthReady(true);
   }, []);
 
   const login = (userData: User) => {
@@ -49,7 +64,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user,
       login,
       logout,
-      isAuthenticated: !!user
+      isAuthenticated: !!user,
+      authReady
     }}>
       {children}
     </AuthContext.Provider>

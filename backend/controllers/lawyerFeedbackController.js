@@ -45,8 +45,8 @@ const createLawyerFeedback = async (req, res) => {
     const clientId = req.user ? req.user.id : null;
     
     // If logged in, use their info unless anonymous
-    let finalClientName = clientName;
-    let finalClientEmail = clientEmail;
+    let finalClientName = clientName || '';
+    let finalClientEmail = clientEmail || '';
     
     if (clientId && !isAnonymous) {
       const client = await User.findById(clientId);
@@ -54,6 +54,12 @@ const createLawyerFeedback = async (req, res) => {
         finalClientName = `${client.firstName} ${client.lastName}`;
         finalClientEmail = client.email;
       }
+    }
+
+    // For anonymous feedback, ensure we have some identifier
+    if (isAnonymous) {
+      finalClientName = finalClientName || 'Anonymous User';
+      finalClientEmail = finalClientEmail || 'anonymous@example.com';
     }
 
     // Create feedback
@@ -92,6 +98,14 @@ const getLawyerFeedback = async (req, res) => {
   try {
     const { lawyerId } = req.params;
     const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
+
+    // Validate lawyerId is a valid ObjectId
+    if (!lawyerId || lawyerId === 'undefined' || !require('mongoose').Types.ObjectId.isValid(lawyerId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid lawyer ID'
+      });
+    }
 
     // Verify lawyer exists
     const lawyer = await User.findOne({ 
@@ -160,6 +174,14 @@ const getLawyerFeedback = async (req, res) => {
 const getLawyerFeedbackSummary = async (req, res) => {
   try {
     const { lawyerId } = req.params;
+
+    // Validate lawyerId is a valid ObjectId
+    if (!lawyerId || lawyerId === 'undefined' || !require('mongoose').Types.ObjectId.isValid(lawyerId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid lawyer ID'
+      });
+    }
 
     // Verify lawyer exists
     const lawyer = await User.findOne({ 

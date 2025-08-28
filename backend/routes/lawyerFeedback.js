@@ -39,16 +39,27 @@ const validateFeedback = [
     .isIn(['consultation', 'document_review', 'legal_advice', 'representation', 'other'])
     .withMessage('Invalid service type'),
   
+  // Only require clientName/email when not anonymous (support boolean or string)
   body('clientName')
-    .if(body('isAnonymous').not().equals('true'))
-    .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Client name must be between 2 and 50 characters'),
+    .custom((value, { req }) => {
+      const isAnon = req.body.isAnonymous === true || req.body.isAnonymous === 'true';
+      if (isAnon) return true;
+      if (typeof value !== 'string' || value.trim().length < 2 || value.trim().length > 50) {
+        throw new Error('Client name must be between 2 and 50 characters');
+      }
+      return true;
+    }),
   
   body('clientEmail')
-    .if(body('isAnonymous').not().equals('true'))
-    .isEmail()
-    .withMessage('Valid email is required'),
+    .custom((value, { req }) => {
+      const isAnon = req.body.isAnonymous === true || req.body.isAnonymous === 'true';
+      if (isAnon) return true;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(String(value || ''))) {
+        throw new Error('Valid email is required');
+      }
+      return true;
+    }),
   
   body('isAnonymous')
     .optional()

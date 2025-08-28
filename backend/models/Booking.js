@@ -229,7 +229,8 @@ bookingSchema.methods.isUpcoming = function() {
 
 // Pre-save middleware to calculate end time
 bookingSchema.pre('save', function(next) {
-  if (this.start && this.durationMins && !this.end) {
+  // Always calculate end time if start and duration are available
+  if (this.start && this.durationMins) {
     const [hours, minutes] = this.start.split(':').map(Number);
     const startMinutes = hours * 60 + minutes;
     const endMinutes = startMinutes + this.durationMins;
@@ -237,6 +238,20 @@ bookingSchema.pre('save', function(next) {
     const endMins = endMinutes % 60;
     this.end = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
   }
+  
+  // If end is provided but doesn't match calculated duration, recalculate
+  if (this.start && this.end && this.durationMins) {
+    const [startHours, startMins] = this.start.split(':').map(Number);
+    const [endHours, endMins] = this.end.split(':').map(Number);
+    const startTotal = startHours * 60 + startMins;
+    const endTotal = endHours * 60 + endMins;
+    const calculatedDuration = endTotal - startTotal;
+    
+    if (calculatedDuration !== this.durationMins) {
+      this.durationMins = calculatedDuration;
+    }
+  }
+  
   next();
 });
 

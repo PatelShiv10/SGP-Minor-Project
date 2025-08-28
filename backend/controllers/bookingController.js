@@ -106,12 +106,21 @@ exports.createBooking = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Selected time is not available' });
     }
 
+    // Calculate end time based on start and duration
+    const [startHours, startMins] = start.split(':').map(Number);
+    const startTotal = startHours * 60 + startMins;
+    const endTotal = startTotal + durationMins;
+    const endHours = Math.floor(endTotal / 60);
+    const endMins = endTotal % 60;
+    const end = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+
     // Try to create booking (unique index prevents double-booking)
     const booking = await Booking.create({ 
       lawyerId, 
       userId, 
       date, 
       start, 
+      end, // Explicitly set the calculated end time
       durationMins, 
       status: 'pending',
       appointmentType: req.body.appointmentType || 'consultation',

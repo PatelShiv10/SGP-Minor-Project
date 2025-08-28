@@ -13,7 +13,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredRole, 
   redirectTo = '/login' 
 }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, authReady } = useAuth();
+
+  // Wait until auth state has been hydrated before deciding
+  if (!authReady) {
+    return null; // or a small loader, but returning null avoids layout shift
+  }
 
   // If not authenticated, redirect to login
   if (!isAuthenticated) {
