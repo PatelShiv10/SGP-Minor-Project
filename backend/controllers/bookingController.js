@@ -61,7 +61,11 @@ exports.getExpandedSlots = async (req, res) => {
 
       if (slots.length > 0) {
         // Exclude already booked slots
-        const bookings = await Booking.find({ lawyerId, date: dateStr, status: 'confirmed' }).select('start');
+        const bookings = await Booking.find({ 
+          lawyerId, 
+          date: dateStr, 
+          status: { $in: ['pending', 'confirmed'] } 
+        }).select('start');
         const bookedSet = new Set(bookings.map(b => b.start));
         slots = slots.filter(s => !bookedSet.has(s));
       }
@@ -102,7 +106,17 @@ exports.createBooking = async (req, res) => {
     }
 
     // Try to create booking (unique index prevents double-booking)
-    const booking = await Booking.create({ lawyerId, userId, date, start, durationMins, status: 'confirmed' });
+    const booking = await Booking.create({ 
+      lawyerId, 
+      userId, 
+      date, 
+      start, 
+      durationMins, 
+      status: 'pending',
+      appointmentType: req.body.appointmentType || 'consultation',
+      meetingType: req.body.meetingType || 'video_call',
+      clientNotes: req.body.notes || ''
+    });
     res.status(201).json({ success: true, message: 'Booking confirmed', data: booking });
   } catch (error) {
     if (error.code === 11000) {
