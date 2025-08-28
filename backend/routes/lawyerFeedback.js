@@ -37,34 +37,7 @@ const validateFeedback = [
   body('serviceType')
     .optional()
     .isIn(['consultation', 'document_review', 'legal_advice', 'representation', 'other'])
-    .withMessage('Invalid service type'),
-  
-  // Only require clientName/email when not anonymous (support boolean or string)
-  body('clientName')
-    .custom((value, { req }) => {
-      const isAnon = req.body.isAnonymous === true || req.body.isAnonymous === 'true';
-      if (isAnon) return true;
-      if (typeof value !== 'string' || value.trim().length < 2 || value.trim().length > 50) {
-        throw new Error('Client name must be between 2 and 50 characters');
-      }
-      return true;
-    }),
-  
-  body('clientEmail')
-    .custom((value, { req }) => {
-      const isAnon = req.body.isAnonymous === true || req.body.isAnonymous === 'true';
-      if (isAnon) return true;
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(String(value || ''))) {
-        throw new Error('Valid email is required');
-      }
-      return true;
-    }),
-  
-  body('isAnonymous')
-    .optional()
-    .isBoolean()
-    .withMessage('isAnonymous must be a boolean')
+    .withMessage('Invalid service type')
 ];
 
 // Validation for response
@@ -76,23 +49,8 @@ const validateResponse = [
 ];
 
 // Public routes
-// Create new feedback (public but optional auth for better UX)
-const optionalAuth = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
-    try {
-      const jwt = require('jsonwebtoken');
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = decoded;
-    } catch (err) {
-      // If token is invalid, continue without auth
-    }
-  }
-  next();
-};
-
-router.post('/', optionalAuth, validateFeedback, createLawyerFeedback);
+// Create new feedback requires auth to bind to user
+router.post('/', protect, validateFeedback, createLawyerFeedback);
 
 // Get feedback for a specific lawyer (public)
 router.get('/lawyer/:lawyerId', getLawyerFeedback);

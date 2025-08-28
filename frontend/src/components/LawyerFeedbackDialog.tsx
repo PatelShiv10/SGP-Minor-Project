@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Star, MessageSquare, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -21,7 +20,6 @@ interface FeedbackForm {
   title: string;
   comment: string;
   serviceType: string;
-  isAnonymous: boolean;
 }
 
 const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
@@ -36,8 +34,7 @@ const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
     rating: 0,
     title: '',
     comment: '',
-    serviceType: 'consultation',
-    isAnonymous: false
+    serviceType: 'consultation'
   });
 
   const { toast } = useToast();
@@ -78,8 +75,7 @@ const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
           rating: feedback.rating,
           title: feedback.title,
           comment: feedback.comment,
-          serviceType: feedback.serviceType,
-          isAnonymous: feedback.isAnonymous
+          serviceType: feedback.serviceType
         })
       });
 
@@ -87,8 +83,8 @@ const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
 
       if (data.success) {
         toast({
-          title: "Feedback Submitted",
-          description: "Thank you for your feedback! It will be reviewed before being published."
+          title: "Review Submitted",
+          description: "Thank you! Your review will be published after approval."
         });
         
         // Reset form
@@ -96,19 +92,18 @@ const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
           rating: 0,
           title: '',
           comment: '',
-          serviceType: 'consultation',
-          isAnonymous: false
+          serviceType: 'consultation'
         });
         
         setOpen(false);
         onFeedbackSubmitted?.();
       } else {
-        throw new Error(data.message || 'Failed to submit feedback');
+        throw new Error(data.message || 'Failed to submit review');
       }
     } catch (error: any) {
       toast({
         title: "Submission Failed",
-        description: error.message || "Failed to submit feedback. Please try again.",
+        description: error.message || "Failed to submit review. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -119,7 +114,7 @@ const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
   const defaultTrigger = (
     <Button variant="outline" className="border-teal text-teal hover:bg-teal hover:text-white">
       <MessageSquare className="h-4 w-4 mr-2" />
-      Leave Feedback
+      Leave Review
     </Button>
   );
 
@@ -208,20 +203,6 @@ const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
             <p className="text-xs text-gray-500">{feedback.comment.length}/1000 characters</p>
           </div>
 
-          {/* Anonymous option */}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="anonymous"
-              checked={feedback.isAnonymous}
-              onCheckedChange={(checked) => 
-                setFeedback({ ...feedback, isAnonymous: checked as boolean })
-              }
-            />
-            <Label htmlFor="anonymous" className="text-sm">
-              Submit anonymously
-            </Label>
-          </div>
-
           {/* Submit button */}
           <div className="flex justify-end space-x-2">
             <Button 
@@ -243,7 +224,7 @@ const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
                   Submitting...
                 </>
               ) : (
-                'Submit Feedback'
+                'Submit Review'
               )}
             </Button>
           </div>

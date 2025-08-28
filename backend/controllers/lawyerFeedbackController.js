@@ -21,11 +21,14 @@ const createLawyerFeedback = async (req, res) => {
       rating, 
       title, 
       comment, 
-      serviceType = 'consultation',
-      isAnonymous = false,
-      clientName,
-      clientEmail 
+      serviceType = 'consultation'
     } = req.body;
+
+    // Require auth to submit feedback so we can use user identity
+    const clientId = req.user ? req.user.id : null;
+    if (!clientId) {
+      return res.status(401).json({ success: false, message: 'Authentication required to submit a review' });
+    }
 
     // Verify lawyer exists and is approved
     const lawyer = await User.findOne({ 
@@ -41,39 +44,24 @@ const createLawyerFeedback = async (req, res) => {
       });
     }
 
-    // Check if user is logged in
-    const clientId = req.user ? req.user.id : null;
-    
-    // If logged in, use their info unless anonymous
-    let finalClientName = clientName || '';
-    let finalClientEmail = clientEmail || '';
-    
-    if (clientId && !isAnonymous) {
-      const client = await User.findById(clientId);
-      if (client) {
-        finalClientName = `${client.firstName} ${client.lastName}`;
-        finalClientEmail = client.email;
-      }
+    // Get client info from DB
+    const client = await User.findById(clientId).select('firstName lastName email');
+    if (!client) {
+      return res.status(400).json({ success: false, message: 'Invalid user' });
     }
 
-    // For anonymous feedback, ensure we have some identifier
-    if (isAnonymous) {
-      finalClientName = finalClientName || 'Anonymous User';
-      finalClientEmail = finalClientEmail || 'anonymous@example.com';
-    }
-
-    // Create feedback
+    // Create feedback (non-anonymous, derived from user)
     const feedback = await LawyerFeedback.create({
       lawyerId,
-      clientId: isAnonymous ? null : clientId,
-      clientName: finalClientName,
-      clientEmail: finalClientEmail,
+      clientId,
+      clientName: `${client.firstName} ${client.lastName}`,
+      clientEmail: client.email,
       rating,
       title,
       comment,
       serviceType,
-      isAnonymous,
-      isApproved: false // Requires manual approval
+      isAnonymous: false,
+      isApproved: false
     });
 
     res.status(201).json({
