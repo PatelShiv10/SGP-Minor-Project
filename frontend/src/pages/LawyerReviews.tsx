@@ -10,6 +10,7 @@ import { Star, TrendingUp, MessageCircle, Reply, Filter, Search, Loader2, Messag
 import { LawyerSidebar } from '@/components/lawyer/LawyerSidebar';
 import { LawyerTopBar } from '@/components/lawyer/LawyerTopBar';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface FeedbackStats {
   averageRating: number;
@@ -31,6 +32,7 @@ const LawyerReviews = () => {
   const [loadingFeedback, setLoadingFeedback] = useState(false);
 
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Mock data for now - replace with actual API calls
   const reviews = [
@@ -66,23 +68,14 @@ const LawyerReviews = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const userId = user.id;
-
-      if (!userId) {
-        toast({
-          title: "Error",
-          description: "User not authenticated",
-          variant: "destructive"
-        });
-        return;
-      }
+      const userId = user?.id;
+      if (!userId) return; // no-op if not available
 
       const response = await fetch(
         `http://localhost:5000/api/lawyer-feedback/lawyer/${userId}/summary`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
           }
         }
       );
@@ -108,16 +101,14 @@ const LawyerReviews = () => {
     try {
       setLoadingFeedback(true);
       const token = localStorage.getItem('token');
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const userId = user.id;
-
-      if (!userId) return;
+      const userId = user?.id;
+      if (!userId) return; // no-op if not available
 
       const response = await fetch(
         `http://localhost:5000/api/lawyer-feedback/lawyer/${userId}`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
           }
         }
       );
@@ -137,7 +128,8 @@ const LawyerReviews = () => {
   useEffect(() => {
     fetchStats();
     fetchFeedback();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const handleRespondToReview = async (review: any) => {
     setSelectedReview(review);
