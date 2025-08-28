@@ -12,8 +12,22 @@ const lawyerFeedbackSchema = new mongoose.Schema({
     ref: 'User',
     required: false // Allow anonymous feedback
   },
-  clientName: { type: String, required: true },
-  clientEmail: { type: String, required: true },
+  clientName: { 
+    type: String, 
+    required: function() {
+      // Only required if not anonymous
+      return !this.isAnonymous;
+    },
+    default: ''
+  },
+  clientEmail: { 
+    type: String, 
+    required: function() {
+      // Only required if not anonymous
+      return !this.isAnonymous;
+    },
+    default: ''
+  },
   rating: { 
     type: Number, 
     required: true, 
