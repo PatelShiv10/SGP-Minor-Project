@@ -15,7 +15,8 @@ import {
   LogOut,
   Menu,
   X,
-  Scale
+  Scale,
+  MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -39,6 +40,7 @@ export const LawyerSidebar = ({ currentPage, setCurrentPage }: LawyerSidebarProp
     { id: 'profile', label: 'Profile', icon: User, path: '/lawyer-profile' },
     { id: 'payments', label: 'Payments', icon: CreditCard, path: '/lawyer-payments' },
     { id: 'reviews', label: 'Reviews', icon: Star, path: '/lawyer-reviews' },
+    { id: 'feedback', label: 'Client Feedback', icon: MessageSquare, path: '/lawyer-feedback' },
     { id: 'settings', label: 'Settings', icon: Settings, path: '/lawyer-settings' }
   ];
 

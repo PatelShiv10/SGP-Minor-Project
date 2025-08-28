@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Star, Phone, MessageCircle, Calendar, Clock, DollarSign, Award, Users, CheckCircle, Shield, Loader2 } from 'lucide-react';
+import LawyerFeedbackDialog from '@/components/LawyerFeedbackDialog';
+import LawyerFeedbackList from '@/components/LawyerFeedbackList';
 
 interface PublicLawyer {
   _id: string;
@@ -147,6 +149,10 @@ const PublicLawyerProfile = () => {
                 <Phone className="h-4 w-4 mr-2" />
                 Call Now
               </Button>
+              <LawyerFeedbackDialog 
+                lawyerId={lawyer._id}
+                lawyerName={fullName}
+              />
             </div>
           </CardContent>
         </Card>
@@ -251,6 +257,15 @@ const PublicLawyerProfile = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-8">
+          <LawyerFeedbackList 
+            lawyerId={lawyer._id}
+            showAll={true}
+            limit={5}
+          />
         </div>
       </div>
     </div>
