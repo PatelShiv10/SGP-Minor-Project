@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ChevronDown, MessageSquare, FileText, Users, Video, Star, Send } from 'lucide-react';
 import { useState } from 'react';
+import LawyerFeedbackSection from '@/components/LawyerFeedbackSection';
 
 const Index = () => {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
@@ -236,6 +237,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Lawyer Feedback Section */}
+      <LawyerFeedbackSection />
 
       {/* FAQ Section */}
       <section className="py-16 bg-white">
