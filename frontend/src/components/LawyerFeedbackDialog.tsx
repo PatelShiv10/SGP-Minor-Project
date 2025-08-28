@@ -21,8 +21,6 @@ interface FeedbackForm {
   title: string;
   comment: string;
   serviceType: string;
-  clientName: string;
-  clientEmail: string;
   isAnonymous: boolean;
 }
 
@@ -39,8 +37,6 @@ const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
     title: '',
     comment: '',
     serviceType: 'consultation',
-    clientName: '',
-    clientEmail: '',
     isAnonymous: false
   });
 
@@ -79,7 +75,11 @@ const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
         headers,
         body: JSON.stringify({
           lawyerId,
-          ...feedback
+          rating: feedback.rating,
+          title: feedback.title,
+          comment: feedback.comment,
+          serviceType: feedback.serviceType,
+          isAnonymous: feedback.isAnonymous
         })
       });
 
@@ -97,8 +97,6 @@ const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
           title: '',
           comment: '',
           serviceType: 'consultation',
-          clientName: '',
-          clientEmail: '',
           isAnonymous: false
         });
         
@@ -223,36 +221,6 @@ const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
               Submit anonymously
             </Label>
           </div>
-
-          {/* Client info (if not anonymous) */}
-          {!feedback.isAnonymous && (
-            <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm font-medium text-gray-700">Contact Information</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="clientName">Your Name *</Label>
-                  <Input
-                    id="clientName"
-                    value={feedback.clientName}
-                    onChange={(e) => setFeedback({ ...feedback, clientName: e.target.value })}
-                    placeholder="Your full name"
-                    required={!feedback.isAnonymous}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="clientEmail">Your Email *</Label>
-                  <Input
-                    id="clientEmail"
-                    type="email"
-                    value={feedback.clientEmail}
-                    onChange={(e) => setFeedback({ ...feedback, clientEmail: e.target.value })}
-                    placeholder="your.email@example.com"
-                    required={!feedback.isAnonymous}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Submit button */}
           <div className="flex justify-end space-x-2">
