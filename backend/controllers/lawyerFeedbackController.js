@@ -50,12 +50,18 @@ const createLawyerFeedback = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid user' });
     }
 
+    const clientFirst = (client.firstName || '').toString().trim();
+    const clientLast = (client.lastName || '').toString().trim();
+    const derivedName = `${clientFirst} ${clientLast}`.trim();
+    const safeClientName = derivedName.length >= 2 ? derivedName : (clientFirst || clientLast || 'Client');
+    const safeClientEmail = (client.email || '').toString().trim() || 'client@example.com';
+
     // Create feedback (non-anonymous, derived from user)
     const feedback = await LawyerFeedback.create({
       lawyerId,
       clientId,
-      clientName: `${client.firstName} ${client.lastName}`,
-      clientEmail: client.email,
+      clientName: safeClientName,
+      clientEmail: safeClientEmail,
       rating,
       title,
       comment,

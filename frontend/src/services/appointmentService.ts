@@ -280,8 +280,12 @@ export const appointmentService = {
 
 // Utility functions
 export const formatAppointmentTime = (start: string, end: string): string => {
+  const asTime = (v: any): string | undefined => {
+    if (typeof v === 'string') return v.trim();
+    return undefined;
+  };
   const formatTime = (time?: string) => {
-    if (!time || typeof time !== 'string' || time.indexOf(':') === -1) {
+    if (!time || time.indexOf(':') === -1) {
       return '--';
     }
     const [hours, minutes] = time.split(':');
@@ -293,8 +297,8 @@ export const formatAppointmentTime = (start: string, end: string): string => {
     return `${displayHour}:${mins} ${ampm}`;
   };
 
-  const startStr = formatTime(start);
-  const endStr = formatTime(end);
+  const startStr = formatTime(asTime(start));
+  const endStr = formatTime(asTime(end));
   return `${startStr} - ${endStr}`;
 };
 
