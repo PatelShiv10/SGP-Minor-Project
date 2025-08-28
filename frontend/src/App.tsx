@@ -234,11 +234,6 @@ const App = () => (
                   <LawyerReviews />
                 </ProtectedRoute>
               } />
-              <Route path="/lawyer-feedback" element={
-                <ProtectedRoute requiredRole="lawyer">
-                  <LawyerFeedbackManagement />
-                </ProtectedRoute>
-              } />
               <Route path="/lawyer-settings" element={
                 <ProtectedRoute requiredRole="lawyer">
                   <LawyerSettings />
