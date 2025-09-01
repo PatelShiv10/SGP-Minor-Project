@@ -179,7 +179,7 @@ const LawyerDashboard = () => {
                           </div>
                           <div className="flex items-center space-x-3">
                             <span className="text-sm font-medium text-gray-700">
-                              {formatAppointmentTime(appointment.start, appointment.end)}
+                              {formatAppointmentTime(appointment.start || '', appointment.end || '')}
                             </span>
                             <Badge className={getStatusColor(appointment.status)}>
                               {appointment.status.replace('_', ' ').toUpperCase()}
