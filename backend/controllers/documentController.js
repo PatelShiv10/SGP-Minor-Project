@@ -24,8 +24,7 @@ const uploadDocument = async (req, res) => {
       title, 
       description, 
       documentType = 'other',
-      tags = [],
-      isPublic = false 
+      tags = []
     } = req.body;
 
     const lawyerId = req.user.id;
@@ -33,7 +32,7 @@ const uploadDocument = async (req, res) => {
     // Verify client relationship exists
     const clientRelationship = await LawyerClient.findOne({
       lawyerId,
-      'clientId._id': clientId,
+      clientId: clientId,
       status: { $in: ['active', 'pending'] }
     });
 
@@ -67,7 +66,7 @@ const uploadDocument = async (req, res) => {
       mimeType: mimetype,
       documentType,
       tags,
-      isPublic,
+      isPublic: false, // Always set to false for security
       uploadedBy: lawyerId
     });
 
@@ -319,7 +318,6 @@ const updateDocument = async (req, res) => {
       documentType, 
       status, 
       tags, 
-      isPublic,
       reviewNotes 
     } = req.body;
 
@@ -337,7 +335,6 @@ const updateDocument = async (req, res) => {
     if (description !== undefined) document.description = description;
     if (documentType !== undefined) document.documentType = documentType;
     if (tags !== undefined) document.tags = tags;
-    if (isPublic !== undefined) document.isPublic = isPublic;
 
     // Handle status change
     if (status !== undefined && status !== document.status) {
