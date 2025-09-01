@@ -265,7 +265,10 @@ const LawyerAppointments = () => {
           </div>
           <div className="flex items-center space-x-1">
             {getMeetingIcon(appointment.meetingType)}
-            <span className="capitalize">{appointment.meetingType.replace('_', ' ')}</span>
+            <span className="capitalize">
+              {appointment?.meetingType?.replace(/_/g, ' ') || "No Meeting Type"}
+            </span>
+
           </div>
           <div>
             <Badge variant="outline" className="text-xs">
@@ -455,7 +458,7 @@ const LawyerAppointments = () => {
                                     <div className="flex items-center space-x-1">
                                       {getMeetingIcon(appointment.meetingType)}
                                       <span className="text-sm capitalize">
-                                        {appointment.meetingType.replace('_', ' ')}
+                                          {appointment?.meetingType?.replace('_', ' ') || "No Meeting Type"}
                                       </span>
                                     </div>
                                   </TableCell>
