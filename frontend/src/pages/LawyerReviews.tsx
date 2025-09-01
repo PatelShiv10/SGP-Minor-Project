@@ -117,9 +117,21 @@ const LawyerReviews = () => {
       
       if (data.success) {
         setFeedback(data.data.feedback || []);
+      } else {
+        console.error('Failed to fetch feedback:', data.message);
+        toast({
+          title: "Error",
+          description: data.message || "Failed to load feedback",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('Error fetching feedback:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load feedback",
+        variant: "destructive"
+      });
     } finally {
       setLoadingFeedback(false);
     }
@@ -308,8 +320,13 @@ const LawyerReviews = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {(stats?.recentReviews || reviews.slice(0, 3)).map((review, index) => (
-                        <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0">
+                      {loadingFeedback ? (
+                        <div className="flex items-center justify-center p-4">
+                          <Loader2 className="h-6 w-6 animate-spin" />
+                          <span className="ml-2">Loading reviews...</span>
+                        </div>
+                      ) : (stats?.recentReviews || feedback.slice(0, 3) || reviews.slice(0, 3)).map((review, index) => (
+                        <div key={review._id || review.id || index} className="border-b border-gray-100 pb-4 last:border-b-0">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-2">
@@ -320,6 +337,11 @@ const LawyerReviews = () => {
                                 <span className="text-xs text-gray-400">
                                   {new Date(review.createdAt || review.date).toLocaleDateString()}
                                 </span>
+                                {!review.isApproved && (
+                                  <Badge className="bg-yellow-100 text-yellow-800 text-xs">
+                                    Pending Approval
+                                  </Badge>
+                                )}
                               </div>
                               <p className="text-gray-700">{review.comment}</p>
                               {review.response && (
@@ -330,7 +352,7 @@ const LawyerReviews = () => {
                                 </div>
                               )}
                             </div>
-                            {!review.response && (
+                            {!review.response && review.isApproved && (
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -356,38 +378,60 @@ const LawyerReviews = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {reviews.map((review) => (
-                        <div key={review.id} className="border-b border-gray-100 pb-4 last:border-b-0">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 mb-2">
+                      {loadingFeedback ? (
+                        <div className="flex items-center justify-center p-8">
+                          <Loader2 className="h-8 w-8 animate-spin" />
+                          <span className="ml-2">Loading reviews...</span>
+                        </div>
+                      ) : feedback.length === 0 ? (
+                        <div className="text-center p-8">
+                          <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                          <h3 className="text-lg font-semibold text-gray-600 mb-2">No reviews yet</h3>
+                          <p className="text-gray-500">Reviews from your clients will appear here once they are submitted and approved.</p>
+                        </div>
+                      ) : (
+                        feedback.map((review) => (
+                          <div key={review._id} className="border-b border-gray-100 pb-4 last:border-b-0">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                                              <div className="flex items-center space-x-2 mb-2">
                                 <div className="flex">{renderStars(review.rating)}</div>
-                                <span className="text-sm text-gray-600">{review.client}</span>
-                                <span className="text-xs text-gray-400">{review.date}</span>
+                                <span className="text-sm text-gray-600">
+                                  {review.clientName || 'Anonymous'}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                  {new Date(review.createdAt).toLocaleDateString()}
+                                </span>
+                                {!review.isApproved && (
+                                  <Badge className="bg-yellow-100 text-yellow-800 text-xs">
+                                    Pending Approval
+                                  </Badge>
+                                )}
                               </div>
-                              <p className="text-gray-700">{review.comment}</p>
-                              {review.response && (
-                                <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                                  <p className="text-sm text-blue-800">
-                                    <strong>Your response:</strong> {review.response}
-                                  </p>
-                                </div>
+                                <p className="text-gray-700">{review.comment}</p>
+                                {review.response && (
+                                  <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                                    <p className="text-sm text-blue-800">
+                                      <strong>Your response:</strong> {review.response.message}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                              {!review.response && review.isApproved && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleRespondToReview(review)}
+                                  className="ml-4"
+                                >
+                                  <Reply className="h-4 w-4 mr-2" />
+                                  Respond
+                                </Button>
                               )}
                             </div>
-                            {!review.response && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleRespondToReview(review)}
-                                className="ml-4"
-                              >
-                                <Reply className="h-4 w-4 mr-2" />
-                                Respond
-                              </Button>
-                            )}
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   </CardContent>
                 </Card>
