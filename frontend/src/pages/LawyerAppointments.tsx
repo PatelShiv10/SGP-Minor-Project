@@ -261,7 +261,7 @@ const LawyerAppointments = () => {
           </div>
           <div className="flex items-center space-x-1">
             <Clock className="h-3 w-3 text-gray-500" />
-            <span>{formatAppointmentTime(appointment.start, appointment.end)}</span>
+            <span>{formatAppointmentTime(appointment.start || '', appointment.end || '')}</span>
           </div>
           <div className="flex items-center space-x-1">
             {getMeetingIcon(appointment.meetingType)}
@@ -437,7 +437,7 @@ const LawyerAppointments = () => {
                                         {formatAppointmentDate(appointment.date)}
                                       </div>
                                       <div className="text-sm text-gray-500">
-                                        {formatAppointmentTime(appointment.start, appointment.end)}
+                                        {formatAppointmentTime(appointment.start || '', appointment.end || '')}
                                       </div>
                                     </div>
                                   </TableCell>
@@ -585,7 +585,7 @@ const LawyerAppointments = () => {
                   {selectedAppointment.userId.firstName} {selectedAppointment.userId.lastName}
                 </h4>
                 <p className="text-sm text-gray-600">
-                  {formatAppointmentDate(selectedAppointment.date)} at {formatAppointmentTime(selectedAppointment.start, selectedAppointment.end)}
+                  {formatAppointmentDate(selectedAppointment.date)} at {formatAppointmentTime(selectedAppointment.start || '', selectedAppointment.end || '')}
                 </p>
               </div>
 

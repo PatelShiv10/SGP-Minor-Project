@@ -119,10 +119,17 @@ const getLawyerFeedback = async (req, res) => {
     const sortObj = {};
     sortObj[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
-    const feedback = await LawyerFeedback.find({ 
-      lawyerId, 
-      isApproved: true 
-    })
+    // Check if the request is from the lawyer themselves (authenticated)
+    const isLawyerRequest = req.user && req.user.id === lawyerId;
+    
+    // If it's the lawyer's own request, show all feedback (approved and pending)
+    // If it's a public request, only show approved feedback
+    const query = { lawyerId };
+    if (!isLawyerRequest) {
+      query.isApproved = true;
+    }
+
+    const feedback = await LawyerFeedback.find(query)
     .sort(sortObj)
     .skip(skip)
     .limit(parseInt(limit))
@@ -130,10 +137,7 @@ const getLawyerFeedback = async (req, res) => {
     .lean();
 
     // Get total count for pagination
-    const total = await LawyerFeedback.countDocuments({ 
-      lawyerId, 
-      isApproved: true 
-    });
+    const total = await LawyerFeedback.countDocuments(query);
 
     // Get rating statistics
     const ratingStats = await LawyerFeedback.getAverageRating(lawyerId);
@@ -190,11 +194,23 @@ const getLawyerFeedbackSummary = async (req, res) => {
       });
     }
 
-    // Get rating statistics
+    // Check if the request is from the lawyer themselves (authenticated)
+    const isLawyerRequest = req.user && req.user.id === lawyerId;
+    
+    // Get rating statistics (only for approved feedback)
     const ratingStats = await LawyerFeedback.getAverageRating(lawyerId);
     
-    // Get recent reviews
-    const recentReviews = await LawyerFeedback.getRecentReviews(lawyerId, 3);
+    // Get recent reviews (show all for lawyer, only approved for public)
+    let recentReviews;
+    if (isLawyerRequest) {
+      recentReviews = await LawyerFeedback.find({ lawyerId })
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .populate('clientId', 'firstName lastName')
+        .lean();
+    } else {
+      recentReviews = await LawyerFeedback.getRecentReviews(lawyerId, 3);
+    }
 
     res.json({
       success: true,
