@@ -66,7 +66,6 @@ export interface UploadDocumentRequest {
   description?: string;
   documentType?: string;
   tags?: string[];
-  isPublic?: boolean;
   file: File;
 }
 
@@ -76,7 +75,6 @@ export interface UpdateDocumentRequest {
   documentType?: string;
   status?: string;
   tags?: string[];
-  isPublic?: boolean;
   reviewNotes?: string;
 }
 
@@ -176,9 +174,7 @@ export const documentService = {
       documentData.tags.forEach(tag => formData.append('tags[]', tag));
     }
     
-    if (documentData.isPublic !== undefined) {
-      formData.append('isPublic', documentData.isPublic.toString());
-    }
+
 
     const response = await fetch(
       `${API_BASE_URL}/documents/upload`,

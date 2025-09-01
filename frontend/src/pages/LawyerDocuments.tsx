@@ -67,7 +67,6 @@ const LawyerDocuments = () => {
     description: '',
     documentType: 'other',
     tags: [] as string[],
-    isPublic: false,
     file: null as File | null
   });
   const [uploading, setUploading] = useState(false);
@@ -145,7 +144,10 @@ const LawyerDocuments = () => {
   }, [page, filters, sortBy, sortOrder, clientIdFromState]);
 
   const handleUploadDocument = async () => {
-    if (!uploadData.file || !uploadData.clientId || !uploadData.title.trim()) {
+    // Check if we're in client-specific view
+    const currentClientId = clientIdFromState || uploadData.clientId;
+    
+    if (!uploadData.file || !currentClientId || !uploadData.title.trim()) {
       toast({
         title: "Error",
         description: "Please fill in all required fields and select a file",
@@ -158,12 +160,12 @@ const LawyerDocuments = () => {
 
     try {
       const documentData: UploadDocumentRequest = {
-        clientId: uploadData.clientId,
+        clientId: currentClientId,
         title: uploadData.title.trim(),
         description: uploadData.description.trim() || undefined,
         documentType: uploadData.documentType,
         tags: uploadData.tags,
-        isPublic: uploadData.isPublic,
+        isPublic: false, // Always set to false for security
         file: uploadData.file
       };
 
@@ -181,7 +183,6 @@ const LawyerDocuments = () => {
         description: '',
         documentType: 'other',
         tags: [],
-        isPublic: false,
         file: null
       });
 
@@ -642,18 +643,7 @@ const LawyerDocuments = () => {
               </p>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="isPublic"
-                checked={uploadData.isPublic}
-                onChange={(e) => setUploadData(prev => ({ ...prev, isPublic: e.target.checked }))}
-                className="rounded"
-              />
-              <Label htmlFor="isPublic" className="text-sm">
-                Make this document public
-              </Label>
-            </div>
+
 
             <div className="flex justify-end space-x-2">
               <Button 

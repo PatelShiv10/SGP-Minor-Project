@@ -84,12 +84,7 @@ const validateDocumentUpload = [
   body('tags')
     .optional()
     .isArray()
-    .withMessage('Tags must be an array'),
-  
-  body('isPublic')
-    .optional()
-    .isBoolean()
-    .withMessage('isPublic must be a boolean')
+    .withMessage('Tags must be an array')
 ];
 
 const validateDocumentUpdate = [
@@ -119,11 +114,6 @@ const validateDocumentUpdate = [
     .optional()
     .isArray()
     .withMessage('Tags must be an array'),
-  
-  body('isPublic')
-    .optional()
-    .isBoolean()
-    .withMessage('isPublic must be a boolean'),
   
   body('reviewNotes')
     .optional()

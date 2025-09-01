@@ -25,8 +25,24 @@ const LawyerMessages = () => {
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToBottom = () => endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  useEffect(scrollToBottom, [messages]);
+  const scrollToBottom = () => {
+    if (endRef.current) {
+      endRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
+  useEffect(() => {
+    // Only auto-scroll if user is near the bottom or if it's a new message
+    const messagesContainer = document.querySelector('.messages-container');
+    if (messagesContainer) {
+      const { scrollTop, scrollHeight, clientHeight } = messagesContainer;
+      const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
+      
+      if (isNearBottom || messages.length === 0) {
+        scrollToBottom();
+      }
+    }
+  }, [messages]);
 
   useEffect(() => {
     const loadConversations = async () => {
@@ -162,7 +178,7 @@ const LawyerMessages = () => {
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col p-0 min-h-0">
                   {/* Messages */}
-                  <div className="flex-1 p-4 space-y-4 overflow-y-auto min-h-0">
+                  <div className="flex-1 p-4 space-y-4 overflow-y-auto min-h-0 messages-container">
                     {loading && <div className="text-center text-gray-500">Loading...</div>}
                     {error && <div className="text-center text-red-600">{error}</div>}
                     {messages.map((msg) => (
