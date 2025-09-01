@@ -10,7 +10,9 @@ const {
   deleteClient,
   archiveClient,
   addClientNote,
-  getClientStats
+  getClientStats,
+  createClientFromBooking,
+  autoCreateClientsFromBookings
 } = require('../controllers/clientController');
 const { protect, lawyer } = require('../middlewares/authMiddleware');
 
@@ -268,6 +270,27 @@ router.post('/:id/notes',
       .withMessage('Note must be between 1 and 500 characters')
   ],
   addClientNote
+);
+
+// Create client from booking
+router.post('/create-from-booking',
+  protect,
+  lawyer,
+  [
+    body('bookingId')
+      .notEmpty()
+      .withMessage('Booking ID is required')
+      .isMongoId()
+      .withMessage('Invalid booking ID format')
+  ],
+  createClientFromBooking
+);
+
+// Auto-create clients from bookings
+router.post('/auto-create-from-bookings',
+  protect,
+  lawyer,
+  autoCreateClientsFromBookings
 );
 
 module.exports = router;

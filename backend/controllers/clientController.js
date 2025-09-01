@@ -538,6 +538,134 @@ const getClientStats = async (req, res) => {
   }
 };
 
+// @desc    Create client relationship from booking
+// @route   POST /api/clients/create-from-booking
+// @access  Private (Lawyer)
+const createClientFromBooking = async (req, res) => {
+  try {
+    const { bookingId } = req.body;
+    const lawyerId = req.user.id;
+
+    // Find the booking
+    const booking = await Booking.findOne({
+      _id: bookingId,
+      lawyerId
+    }).populate('userId', 'firstName lastName email phone');
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found'
+      });
+    }
+
+    // Check if client relationship already exists
+    const existingClient = await LawyerClient.findOne({
+      lawyerId,
+      clientId: booking.userId._id
+    });
+
+    if (existingClient) {
+      return res.status(400).json({
+        success: false,
+        message: 'Client relationship already exists'
+      });
+    }
+
+    // Create client relationship
+    const client = await LawyerClient.create({
+      lawyerId,
+      clientId: booking.userId._id,
+      addedBy: 'booking',
+      status: 'active',
+      caseType: booking.appointmentType || 'consultation',
+      caseTitle: `Consultation - ${booking.appointmentType || 'General'}`,
+      preferredContact: 'email',
+      lastContactDate: new Date(),
+      totalBilled: 0,
+      totalPaid: 0
+    });
+
+    await client.populate('clientId', 'firstName lastName email phone profileImage');
+
+    res.status(201).json({
+      success: true,
+      message: 'Client relationship created successfully',
+      data: client
+    });
+
+  } catch (error) {
+    console.error('Error creating client from booking:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create client relationship'
+    });
+  }
+};
+
+// @desc    Auto-create client relationships from pending bookings
+// @route   POST /api/clients/auto-create-from-bookings
+// @access  Private (Lawyer)
+const autoCreateClientsFromBookings = async (req, res) => {
+  try {
+    const lawyerId = req.user.id;
+
+    // Find all confirmed bookings that don't have client relationships
+    const bookings = await Booking.find({
+      lawyerId,
+      status: { $in: ['confirmed', 'completed'] }
+    }).populate('userId', 'firstName lastName email phone');
+
+    const createdClients = [];
+    const existingClients = [];
+
+    for (const booking of bookings) {
+      // Check if client relationship already exists
+      const existingClient = await LawyerClient.findOne({
+        lawyerId,
+        clientId: booking.userId._id
+      });
+
+      if (!existingClient) {
+        // Create client relationship
+        const client = await LawyerClient.create({
+          lawyerId,
+          clientId: booking.userId._id,
+          addedBy: 'booking',
+          status: 'active',
+          caseType: booking.appointmentType || 'consultation',
+          caseTitle: `Consultation - ${booking.appointmentType || 'General'}`,
+          preferredContact: 'email',
+          lastContactDate: new Date(),
+          totalBilled: 0,
+          totalPaid: 0
+        });
+
+        await client.populate('clientId', 'firstName lastName email phone profileImage');
+        createdClients.push(client);
+      } else {
+        existingClients.push(existingClient);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Created ${createdClients.length} new client relationships`,
+      data: {
+        created: createdClients,
+        existing: existingClients.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Error auto-creating clients from bookings:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create client relationships'
+    });
+  }
+};
+
 module.exports = {
   getLawyerClients,
   addClient,
@@ -547,5 +675,7 @@ module.exports = {
   deleteClient,
   archiveClient,
   addClientNote,
-  getClientStats
+  getClientStats,
+  createClientFromBooking,
+  autoCreateClientsFromBookings
 };

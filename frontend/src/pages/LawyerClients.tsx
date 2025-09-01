@@ -180,6 +180,36 @@ const LawyerClients = () => {
     });
   };
 
+  const handleAutoCreateClients = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/clients/auto-create-from-bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: "Success",
+          description: `Created ${data.data.created.length} new client relationships`
+        });
+        fetchClients();
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create client relationships",
+        variant: "destructive"
+      });
+    }
+  };
+
   const caseTypes = [
     'all', 'family_law', 'corporate_law', 'criminal_law', 'civil_litigation',
     'real_estate', 'immigration', 'personal_injury', 'employment',
@@ -331,6 +361,14 @@ const LawyerClients = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
               <h1 className="text-2xl lg:text-3xl font-bold text-navy">Clients</h1>
               <div className="flex space-x-2">
+                <Button 
+                  onClick={handleAutoCreateClients}
+                  variant="outline"
+                  className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Auto-Create from Bookings
+                </Button>
                 <Button 
                   onClick={fetchClients}
                   variant="outline"
