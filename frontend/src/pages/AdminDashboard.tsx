@@ -8,12 +8,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { MessageSquare, Users, BarChart3, ChevronDown, User, LogOut } from 'lucide-react';
 import { FeedbackManagement } from '@/components/admin/FeedbackManagement';
 import { LawyerDirectoryManagement } from '@/components/admin/LawyerDirectoryManagement';
+import { LawyerFeedbackManagement } from '@/components/admin/LawyerFeedbackManagement';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useLawyers } from '@/hooks/useLawyers';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('feedback');
+  const [activeTab, setActiveTab] = useState('lawyer-feedback');
   const { logout } = useAuth();
   const navigate = useNavigate();
   const { stats: lawyerStats } = useLawyers('admin');
@@ -123,13 +124,18 @@ const AdminDashboard = () => {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="feedback">Feedback Management</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="feedback">General Feedback</TabsTrigger>
+            <TabsTrigger value="lawyer-feedback">Lawyer Feedback</TabsTrigger>
             <TabsTrigger value="lawyers">Lawyer Directory</TabsTrigger>
           </TabsList>
 
           <TabsContent value="feedback" className="space-y-4">
             <FeedbackManagement />
+          </TabsContent>
+
+          <TabsContent value="lawyer-feedback" className="space-y-4">
+            <LawyerFeedbackManagement />
           </TabsContent>
 
           <TabsContent value="lawyers" className="space-y-4">

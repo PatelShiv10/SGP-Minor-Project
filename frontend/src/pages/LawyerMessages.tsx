@@ -154,15 +154,15 @@ const LawyerMessages = () => {
               </Card>
 
               {/* Chat Area */}
-              <Card className="shadow-soft border-0 lg:col-span-2 flex flex-col">
-                <CardHeader className="border-b border-gray-200">
+              <Card className="shadow-soft border-0 lg:col-span-2 flex flex-col h-[calc(100vh-200px)]">
+                <CardHeader className="border-b border-gray-200 flex-shrink-0">
                   <CardTitle className="text-lg">
                     {selectedUserId ? 'Conversation' : 'Select a conversation'}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="flex-1 flex flex-col p-0">
+                <CardContent className="flex-1 flex flex-col p-0 min-h-0">
                   {/* Messages */}
-                  <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+                  <div className="flex-1 p-4 space-y-4 overflow-y-auto min-h-0">
                     {loading && <div className="text-center text-gray-500">Loading...</div>}
                     {error && <div className="text-center text-red-600">{error}</div>}
                     {messages.map((msg) => (
@@ -181,7 +181,7 @@ const LawyerMessages = () => {
                   </div>
 
                   {/* Message Input */}
-                  <div className="p-4 border-t border-gray-200">
+                  <div className="p-4 border-t border-gray-200 flex-shrink-0">
                     <div className="flex space-x-2">
                       <Input
                         placeholder="Type your message..."

@@ -7,6 +7,7 @@ const {
   getLawyerFeedbackSummary,
   getPendingFeedback,
   approveFeedback,
+  rejectFeedback,
   respondToFeedback,
   markFeedbackHelpful
 } = require('../controllers/lawyerFeedbackController');
@@ -67,5 +68,6 @@ router.put('/:id/respond', protect, lawyer, validateResponse, respondToFeedback)
 // Protected routes - Admin only
 router.get('/pending', protect, admin, getPendingFeedback);
 router.put('/:id/approve', protect, admin, approveFeedback);
+router.put('/:id/reject', protect, admin, rejectFeedback);
 
 module.exports = router;

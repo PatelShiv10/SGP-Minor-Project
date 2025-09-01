@@ -34,35 +34,21 @@ const LawyerReviews = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Mock data for now - replace with actual API calls
-  const reviews = [
-    {
-      id: 1,
-      client: "John Smith",
-      rating: 5,
-      date: "2024-01-15",
-      comment: "Excellent service! Very professional and knowledgeable. Helped me resolve my case quickly.",
-      response: null
-    },
-    {
-      id: 2,
-      client: "Sarah Johnson",
-      rating: 4,
-      date: "2024-01-14",
-      comment: "Good communication and fair pricing. Would recommend to others.",
-      response: "Thank you for your feedback! It was a pleasure working with you."
-    },
-    {
-      id: 3,
-      client: "Mike Wilson",
-      rating: 5,
-      date: "2024-01-12",
-      comment: "Outstanding legal representation. Dr. Smith went above and beyond to help with my case.",
-      response: null
-    }
-  ];
+  // Use actual feedback data from API instead of mock data
+  const reviews = feedback.map((item: any) => ({
+    id: item._id,
+    client: item.clientName || 'Anonymous',
+    rating: item.rating,
+    date: new Date(item.createdAt).toLocaleDateString(),
+    comment: item.comment,
+    response: item.lawyerResponse,
+    title: item.title,
+    serviceType: item.serviceType
+  }));
 
-  const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+  const averageRating = feedback.length > 0 
+    ? feedback.reduce((sum: number, review: any) => sum + review.rating, 0) / feedback.length 
+    : 0;
 
   const fetchStats = async () => {
     try {
@@ -308,42 +294,50 @@ const LawyerReviews = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {(stats?.recentReviews || reviews.slice(0, 3)).map((review, index) => (
-                        <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 mb-2">
-                                <div className="flex">{renderStars(review.rating || 5)}</div>
-                                <span className="text-sm text-gray-600">
-                                  {review.clientName || review.client || 'Anonymous'}
-                                </span>
-                                <span className="text-xs text-gray-400">
-                                  {new Date(review.createdAt || review.date).toLocaleDateString()}
-                                </span>
-                              </div>
-                              <p className="text-gray-700">{review.comment}</p>
-                              {review.response && (
-                                <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                                  <p className="text-sm text-blue-800">
-                                    <strong>Your response:</strong> {review.response.message || review.response}
-                                  </p>
+                      {(stats?.recentReviews || reviews.slice(0, 3)).length > 0 ? (
+                        (stats?.recentReviews || reviews.slice(0, 3)).map((review, index) => (
+                          <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <div className="flex">{renderStars(review.rating || 5)}</div>
+                                  <span className="text-sm text-gray-600">
+                                    {review.clientName || review.client || 'Anonymous'}
+                                  </span>
+                                  <span className="text-xs text-gray-400">
+                                    {new Date(review.createdAt || review.date).toLocaleDateString()}
+                                  </span>
                                 </div>
+                                <p className="text-gray-700">{review.comment}</p>
+                                {review.response && (
+                                  <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                                    <p className="text-sm text-blue-800">
+                                      <strong>Your response:</strong> {review.response.message || review.response}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                              {!review.response && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleRespondToReview(review)}
+                                  className="ml-4"
+                                >
+                                  <Reply className="h-4 w-4 mr-2" />
+                                  Respond
+                                </Button>
                               )}
                             </div>
-                            {!review.response && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleRespondToReview(review)}
-                                className="ml-4"
-                              >
-                                <Reply className="h-4 w-4 mr-2" />
-                                Respond
-                              </Button>
-                            )}
                           </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-500 text-lg">No reviews yet</p>
+                          <p className="text-gray-400 text-sm">Reviews from your clients will appear here</p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -356,38 +350,46 @@ const LawyerReviews = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {reviews.map((review) => (
-                        <div key={review.id} className="border-b border-gray-100 pb-4 last:border-b-0">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 mb-2">
-                                <div className="flex">{renderStars(review.rating)}</div>
-                                <span className="text-sm text-gray-600">{review.client}</span>
-                                <span className="text-xs text-gray-400">{review.date}</span>
-                              </div>
-                              <p className="text-gray-700">{review.comment}</p>
-                              {review.response && (
-                                <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                                  <p className="text-sm text-blue-800">
-                                    <strong>Your response:</strong> {review.response}
-                                  </p>
+                      {reviews.length > 0 ? (
+                        reviews.map((review) => (
+                          <div key={review.id} className="border-b border-gray-100 pb-4 last:border-b-0">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <div className="flex">{renderStars(review.rating)}</div>
+                                  <span className="text-sm text-gray-600">{review.client}</span>
+                                  <span className="text-xs text-gray-400">{review.date}</span>
                                 </div>
+                                <p className="text-gray-700">{review.comment}</p>
+                                {review.response && (
+                                  <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                                    <p className="text-sm text-blue-800">
+                                      <strong>Your response:</strong> {review.response}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                              {!review.response && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleRespondToReview(review)}
+                                  className="ml-4"
+                                >
+                                  <Reply className="h-4 w-4 mr-2" />
+                                  Respond
+                                </Button>
                               )}
                             </div>
-                            {!review.response && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleRespondToReview(review)}
-                                className="ml-4"
-                              >
-                                <Reply className="h-4 w-4 mr-2" />
-                                Respond
-                              </Button>
-                            )}
                           </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-500 text-lg">No reviews yet</p>
+                          <p className="text-gray-400 text-sm">Reviews from your clients will appear here</p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </CardContent>
                 </Card>

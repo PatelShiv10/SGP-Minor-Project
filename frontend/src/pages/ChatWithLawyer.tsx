@@ -142,9 +142,9 @@ const ChatWithLawyer = () => {
         <div className="flex flex-1 gap-4 min-h-0">
           {/* Chat Area */}
           <div className="flex-1 flex flex-col">
-            <Card className="flex-1 shadow-soft border-0 flex flex-col">
+            <Card className="flex-1 shadow-soft border-0 flex flex-col h-[calc(100vh-200px)]">
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0">
                 {loading && <div className="text-center text-gray-500">Loading...</div>}
                 {error && <div className="text-center text-red-600">{error}</div>}
                 {messages.map((message) => (
@@ -172,7 +172,7 @@ const ChatWithLawyer = () => {
               </div>
 
               {/* Input Area */}
-              <div className="border-t p-4">
+              <div className="border-t p-4 flex-shrink-0">
                 <div className="flex gap-2">
                   <Input
                     value={inputText}

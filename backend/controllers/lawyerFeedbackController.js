@@ -67,7 +67,7 @@ const createLawyerFeedback = async (req, res) => {
       comment,
       serviceType,
       isAnonymous: false,
-      isApproved: false
+      isApproved: true // Auto-approve for now, can be changed back to false when admin approval is implemented
     });
 
     res.status(201).json({
@@ -252,20 +252,16 @@ const getPendingFeedback = async (req, res) => {
   }
 };
 
-// @desc    Approve or reject feedback
+// @desc    Approve feedback
 // @route   PUT /api/lawyer-feedback/:id/approve
 // @access  Private/Admin
 const approveFeedback = async (req, res) => {
   try {
     const { id } = req.params;
-    const { isApproved, rejectionReason } = req.body;
 
     const feedback = await LawyerFeedback.findByIdAndUpdate(
       id,
-      { 
-        isApproved,
-        ...(rejectionReason && { rejectionReason })
-      },
+      { isApproved: true },
       { new: true }
     ).populate('lawyerId', 'firstName lastName email');
 
@@ -278,12 +274,47 @@ const approveFeedback = async (req, res) => {
 
     res.json({
       success: true,
-      message: `Feedback ${isApproved ? 'approved' : 'rejected'} successfully`,
+      message: 'Feedback approved successfully',
       data: feedback
     });
 
   } catch (error) {
     console.error('Error approving feedback:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update feedback status'
+    });
+  }
+};
+
+// @desc    Reject feedback
+// @route   PUT /api/lawyer-feedback/:id/reject
+// @access  Private/Admin
+const rejectFeedback = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const feedback = await LawyerFeedback.findByIdAndUpdate(
+      id,
+      { isApproved: false, isRejected: true },
+      { new: true }
+    ).populate('lawyerId', 'firstName lastName email');
+
+    if (!feedback) {
+      return res.status(404).json({
+        success: false,
+        message: 'Feedback not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Feedback rejected successfully',
+      data: feedback
+    });
+
+  } catch (error) {
+    console.error('Error rejecting feedback:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update feedback status'
@@ -378,6 +409,7 @@ module.exports = {
   getLawyerFeedbackSummary,
   getPendingFeedback,
   approveFeedback,
+  rejectFeedback,
   respondToFeedback,
   markFeedbackHelpful
 };
