@@ -74,8 +74,7 @@ lawyerFeedbackSchema.statics.getAverageRating = async function(lawyerId) {
     { 
       $match: { 
         lawyerId: new mongoose.Types.ObjectId(lawyerId), 
-        // Include all feedback for lawyer's own view, but this method is also used for public stats
-        // We'll handle the approval filter in the controller
+        isApproved: true 
       } 
     },
     {
@@ -121,14 +120,4 @@ lawyerFeedbackSchema.statics.getRecentReviews = async function(lawyerId, limit =
   .lean();
 };
 
-// Static method to get all reviews for lawyer (including pending)
-lawyerFeedbackSchema.statics.getAllReviewsForLawyer = async function(lawyerId, limit = 10) {
-  return await this.find({ 
-    lawyerId: new mongoose.Types.ObjectId(lawyerId)
-  })
-  .sort({ createdAt: -1 })
-  .limit(limit)
-  .populate('clientId', 'firstName lastName')
-  .lean();
-};
 module.exports = mongoose.model('LawyerFeedback', lawyerFeedbackSchema);
