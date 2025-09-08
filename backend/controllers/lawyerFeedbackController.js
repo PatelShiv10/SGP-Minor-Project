@@ -67,12 +67,12 @@ const createLawyerFeedback = async (req, res) => {
       comment,
       serviceType,
       isAnonymous: false,
-      isApproved: false
+      isApproved: true
     });
 
     res.status(201).json({
       success: true,
-      message: 'Feedback submitted successfully. It will be reviewed before being published.',
+      message: 'Feedback submitted successfully.',
       data: feedback
     });
 

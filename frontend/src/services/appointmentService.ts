@@ -75,6 +75,14 @@ export interface DashboardStats {
     time: string;
     type: string;
   }>;
+  recentReviews?: Array<{
+    rating: number;
+    comment: string;
+    clientName?: string;
+    createdAt: string;
+    isApproved?: boolean;
+    response?: { message?: string } | string;
+  }>;
 }
 
 export interface PaginationInfo {
