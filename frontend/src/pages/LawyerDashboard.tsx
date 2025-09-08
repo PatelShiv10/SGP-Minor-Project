@@ -77,16 +77,7 @@ const LawyerDashboard = () => {
   };
   
   useEffect(() => {
-    // Only auto-scroll if user is near the bottom or if it's a new message
-    const messagesContainer = document.querySelector('.dashboard-messages-container');
-    if (messagesContainer) {
-      const { scrollTop, scrollHeight, clientHeight } = messagesContainer;
-      const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
-      
-      if (isNearBottom || messages.length === 0) {
-        scrollToBottom();
-      }
-    }
+    scrollToBottom();
   }, [messages]);
 
   const loadConversations = async () => {

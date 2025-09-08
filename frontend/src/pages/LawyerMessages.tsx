@@ -178,39 +178,58 @@ const LawyerMessages = () => {
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col p-0 min-h-0">
                   {/* Messages */}
-                  <div className="flex-1 p-4 space-y-4 overflow-y-auto min-h-0 messages-container">
+                  <div className="flex-1 p-4 space-y-4 overflow-y-auto min-h-0 messages-container max-h-[60vh]">
                     {loading && <div className="text-center text-gray-500">Loading...</div>}
                     {error && <div className="text-center text-red-600">{error}</div>}
-                    {messages.map((msg) => (
-                      <div key={msg._id} className={`flex ${msg.sender === 'lawyer' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          msg.sender === 'lawyer' ? 'bg-teal text-white' : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          <p className="text-sm">{msg.text}</p>
-                          <p className={`text-xs mt-1 ${msg.sender === 'lawyer' ? 'text-teal-100' : 'text-gray-500'}`}>
-                            {new Date(msg.createdAt).toLocaleTimeString()}
-                          </p>
-                        </div>
+                    {!selectedUserId ? (
+                      <div className="flex items-center justify-center h-full text-gray-500">
+                        <p>Select a conversation to start messaging</p>
                       </div>
-                    ))}
-                    <div ref={endRef} />
+                    ) : (
+                      <>
+                        {messages.map((msg) => (
+                          <div key={msg._id} className={`flex ${msg.sender === 'lawyer' ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[70%] ${msg.sender === 'lawyer' ? 'order-2' : 'order-1'}`}>
+                              <div className={`p-4 rounded-lg ${
+                                msg.sender === 'lawyer' 
+                                  ? 'bg-teal text-white' 
+                                  : 'bg-gray-100'
+                              }`}>
+                                <p className="leading-relaxed">{msg.text}</p>
+                              </div>
+                              <div className={`text-xs text-gray-500 mt-1 ${
+                                msg.sender === 'lawyer' ? 'text-right' : 'text-left'
+                              }`}>
+                                {new Date(msg.createdAt).toLocaleTimeString()}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        <div ref={endRef} />
+                      </>
+                    )}
                   </div>
 
                   {/* Message Input */}
-                  <div className="p-4 border-t border-gray-200">
-                    <div className="flex space-x-2">
+                  <div className="border-t border-gray-200 p-4 flex-shrink-0">
+                    <div className="flex gap-2">
                       <Input
-                        placeholder="Type your message..."
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        className="flex-1"
+                        onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
+                        placeholder="Type your message..."
+                        className="flex-1 border-gray-300 focus:border-teal focus:ring-teal"
                         disabled={!selectedUserId}
                       />
-                      <Button onClick={handleSendMessage} disabled={!selectedUserId || !message.trim()} className="bg-teal hover:bg-teal-light text-white">
+                      <Button
+                        onClick={handleSendMessage}
+                        disabled={!selectedUserId || !message.trim()}
+                        className="bg-teal hover:bg-teal-light text-white px-6"
+                      >
                         <Send className="h-4 w-4" />
                       </Button>
-                    </div>
+                        </div>
+                      </div>
                   </div>
                 </CardContent>
               </Card>
