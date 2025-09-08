@@ -117,6 +117,10 @@ const LawyerReviews = () => {
       
       if (data.success) {
         setFeedback(data.data.feedback || []);
+        // Also update stats with the latest data
+        if (data.data.ratingStats) {
+          setStats(data.data.ratingStats);
+        }
       } else {
         console.error('Failed to fetch feedback:', data.message);
         toast({
@@ -140,6 +144,13 @@ const LawyerReviews = () => {
   useEffect(() => {
     fetchStats();
     fetchFeedback();
+    
+    // Set up polling to check for new reviews every 30 seconds
+    const interval = setInterval(() => {
+      fetchFeedback();
+    }, 30000);
+    
+    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
@@ -316,7 +327,19 @@ const LawyerReviews = () => {
                 {/* Recent Reviews */}
                 <Card className="shadow-soft border-0">
                   <CardHeader>
-                    <CardTitle className="text-lg text-navy">Recent Reviews</CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg text-navy">Recent Reviews</CardTitle>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          fetchFeedback();
+                          fetchStats();
+                        }}
+                      >
+                        Refresh
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -325,7 +348,13 @@ const LawyerReviews = () => {
                           <Loader2 className="h-6 w-6 animate-spin" />
                           <span className="ml-2">Loading reviews...</span>
                         </div>
-                      ) : (stats?.recentReviews || feedback.slice(0, 3) || reviews.slice(0, 3)).map((review, index) => (
+                      ) : feedback.length === 0 ? (
+                        <div className="text-center p-8">
+                          <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                          <h3 className="text-lg font-semibold text-gray-600 mb-2">No reviews yet</h3>
+                          <p className="text-gray-500">Reviews from your clients will appear here once they are submitted.</p>
+                        </div>
+                      ) : feedback.slice(0, 3).map((review, index) => (
                         <div key={review._id || review.id || index} className="border-b border-gray-100 pb-4 last:border-b-0">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -343,6 +372,7 @@ const LawyerReviews = () => {
                                   </Badge>
                                 )}
                               </div>
+                              <h4 className="font-medium text-navy mb-1">{review.title}</h4>
                               <p className="text-gray-700">{review.comment}</p>
                               {review.response && (
                                 <div className="mt-3 p-3 bg-blue-50 rounded-lg">
@@ -374,7 +404,19 @@ const LawyerReviews = () => {
               <TabsContent value="reviews" className="space-y-6">
                 <Card className="shadow-soft border-0">
                   <CardHeader>
-                    <CardTitle className="text-lg text-navy">All Reviews</CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg text-navy">All Reviews ({feedback.length})</CardTitle>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          fetchFeedback();
+                          fetchStats();
+                        }}
+                      >
+                        Refresh
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -387,7 +429,10 @@ const LawyerReviews = () => {
                         <div className="text-center p-8">
                           <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                           <h3 className="text-lg font-semibold text-gray-600 mb-2">No reviews yet</h3>
-                          <p className="text-gray-500">Reviews from your clients will appear here once they are submitted and approved.</p>
+                          <p className="text-gray-500 mb-4">Reviews from your clients will appear here once they are submitted.</p>
+                          <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg">
+                            <p><strong>Note:</strong> Reviews are automatically approved and will appear immediately after submission.</p>
+                          </div>
                         </div>
                       ) : (
                         feedback.map((review) => (
@@ -402,9 +447,14 @@ const LawyerReviews = () => {
                                 <span className="text-xs text-gray-400">
                                   {new Date(review.createdAt).toLocaleDateString()}
                                 </span>
-                                {!review.isApproved && (
+                                {review.isApproved === false && (
                                   <Badge className="bg-yellow-100 text-yellow-800 text-xs">
                                     Pending Approval
+                                  </Badge>
+                                )}
+                                {review.isApproved === true && (
+                                  <Badge className="bg-green-100 text-green-800 text-xs">
+                                    Approved
                                   </Badge>
                                 )}
                               </div>
@@ -420,7 +470,8 @@ const LawyerReviews = () => {
                               {!review.response && review.isApproved && (
                                 <Button
                                   variant="outline"
-                                  size="sm"
+                              <h4 className="font-medium text-navy mb-1">{review.title}</h4>
+                              <p className="text-gray-700">{review.comment}</p>
                                   onClick={() => handleRespondToReview(review)}
                                   className="ml-4"
                                 >
@@ -429,7 +480,7 @@ const LawyerReviews = () => {
                                 </Button>
                               )}
                             </div>
-                          </div>
+                            {!review.response && review.isApproved !== false && (
                         ))
                       )}
                     </div>

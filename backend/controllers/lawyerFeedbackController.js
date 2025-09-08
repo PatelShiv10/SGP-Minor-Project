@@ -67,12 +67,12 @@ const createLawyerFeedback = async (req, res) => {
       comment,
       serviceType,
       isAnonymous: false,
-      isApproved: true
+      isApproved: true // Auto-approve all feedback for immediate display
     });
 
     res.status(201).json({
       success: true,
-      message: 'Feedback submitted successfully.',
+      message: 'Feedback submitted successfully and is now visible.',
       data: feedback
     });
 
@@ -122,19 +122,19 @@ const getLawyerFeedback = async (req, res) => {
     // Check if the request is from the lawyer themselves (authenticated)
     const isLawyerRequest = req.user && req.user.id === lawyerId;
     
-    // If it's the lawyer's own request, show all feedback (approved and pending)
-    // If it's a public request, only show approved feedback
+    // If it's the lawyer's own request, show all feedback
+    // If it's a public request, only show approved feedback  
     const query = { lawyerId };
     if (!isLawyerRequest) {
       query.isApproved = true;
     }
 
     const feedback = await LawyerFeedback.find(query)
-    .sort(sortObj)
-    .skip(skip)
-    .limit(parseInt(limit))
-    .populate('clientId', 'firstName lastName', null, { strictPopulate: false })
-    .lean();
+      .sort(sortObj)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate('clientId', 'firstName lastName', null, { strictPopulate: false })
+      .lean();
 
     // Get total count for pagination
     const total = await LawyerFeedback.countDocuments(query);
@@ -146,14 +146,14 @@ const getLawyerFeedback = async (req, res) => {
       success: true,
       data: {
         feedback,
+        ratingStats, // Include rating stats in the response
         pagination: {
           currentPage: parseInt(page),
           totalPages: Math.ceil(total / parseInt(limit)),
           totalItems: total,
           hasNext: skip + feedback.length < total,
           hasPrev: parseInt(page) > 1
-        },
-        ratingStats
+        }
       }
     });
 
@@ -197,18 +197,20 @@ const getLawyerFeedbackSummary = async (req, res) => {
     // Check if the request is from the lawyer themselves (authenticated)
     const isLawyerRequest = req.user && req.user.id === lawyerId;
     
-    // Get rating statistics (only for approved feedback)
+    // Get rating statistics
     const ratingStats = await LawyerFeedback.getAverageRating(lawyerId);
     
-    // Get recent reviews (show all for lawyer, only approved for public)
+    // Get recent reviews
     let recentReviews;
     if (isLawyerRequest) {
+      // For lawyer's own request, show all reviews (approved and pending)
       recentReviews = await LawyerFeedback.find({ lawyerId })
         .sort({ createdAt: -1 })
         .limit(3)
         .populate('clientId', 'firstName lastName')
         .lean();
     } else {
+      // For public requests, only show approved reviews
       recentReviews = await LawyerFeedback.getRecentReviews(lawyerId, 3);
     }
 

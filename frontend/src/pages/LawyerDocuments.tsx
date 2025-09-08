@@ -141,6 +141,11 @@ const LawyerDocuments = () => {
     if (!clientIdFromState) {
       fetchClients();
     }
+    
+    // Set the client ID in upload form if we're viewing a specific client's documents
+    if (clientIdFromState) {
+      setUploadData(prev => ({ ...prev, clientId: clientIdFromState }));
+    }
   }, [page, filters, sortBy, sortOrder, clientIdFromState]);
 
   const handleUploadDocument = async () => {
@@ -277,13 +282,24 @@ const LawyerDocuments = () => {
               <h1 className="text-2xl lg:text-3xl font-bold text-navy">
                 {clientNameFromState ? `${clientNameFromState}'s Documents` : 'Documents'}
               </h1>
-              <Button 
-                className="bg-teal hover:bg-teal-light text-white w-full sm:w-auto"
-                onClick={() => setUploadDialogOpen(true)}
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Upload Document
-              </Button>
+              <div className="flex gap-2">
+                {clientNameFromState && (
+                  <Button 
+                    variant="outline"
+                    onClick={() => navigate('/lawyer-clients')}
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                  >
+                    Back to Clients
+                  </Button>
+                )}
+                <Button 
+                  className="bg-teal hover:bg-teal-light text-white w-full sm:w-auto"
+                  onClick={() => setUploadDialogOpen(true)}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Document
+                </Button>
+              </div>
             </div>
 
             {/* Stats Cards */}
@@ -563,7 +579,7 @@ const LawyerDocuments = () => {
           </DialogHeader>
           
           <div className="space-y-4">
-            {!clientIdFromState && (
+            {!clientIdFromState && !uploadData.clientId && (
               <div className="space-y-2">
                 <Label htmlFor="client">Client *</Label>
                 <Select 
@@ -584,6 +600,13 @@ const LawyerDocuments = () => {
               </div>
             )}
 
+            {(clientIdFromState || uploadData.clientId) && (
+              <div className="p-3 bg-teal-50 rounded-lg border border-teal-200">
+                <p className="text-sm text-teal-800">
+                  <strong>Uploading for:</strong> {clientNameFromState || 'Selected Client'}
+                </p>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="title">Document Title *</Label>
               <Input
@@ -655,7 +678,7 @@ const LawyerDocuments = () => {
               </Button>
               <Button 
                 onClick={handleUploadDocument}
-                disabled={uploading || !uploadData.file || !uploadData.title.trim() || (!clientIdFromState && !uploadData.clientId)}
+                disabled={uploading || !uploadData.file || !uploadData.title.trim() || (!clientIdFromState && !uploadData.clientId && !location.state?.clientId)}
                 className="bg-teal hover:bg-teal-light text-white"
               >
                 {uploading ? (
