@@ -7,7 +7,6 @@ import { Send, Search } from 'lucide-react';
 import { LawyerSidebar } from '@/components/lawyer/LawyerSidebar';
 import { LawyerTopBar } from '@/components/lawyer/LawyerTopBar';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLocation } from 'react-router-dom';
 
 interface Message {
   _id: string;
@@ -27,13 +26,10 @@ interface ConversationPreview {
 const LawyerMessages = () => {
   const [currentPage, setCurrentPage] = useState('messages');
   const { user } = useAuth();
-  const location = useLocation();
   const lawyerId = user?.id;
 
   const [conversations, setConversations] = useState<ConversationPreview[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(
-    location.state?.clientId || null
-  );
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -68,7 +64,7 @@ const LawyerMessages = () => {
         if (!res.ok) throw new Error('Failed to load conversations');
         const data = await res.json();
         setConversations(data.data);
-        if (!selectedUserId && !location.state?.clientId && data.data.length > 0) {
+        if (!selectedUserId && data.data.length > 0) {
           setSelectedUserId(data.data[0].userId);
         }
       } catch {
@@ -76,7 +72,7 @@ const LawyerMessages = () => {
       }
     };
     loadConversations();
-  }, [lawyerId, location.state?.clientId]);
+  }, [lawyerId]);
 
   useEffect(() => {
     const loadConversation = async () => {
@@ -147,26 +143,19 @@ const LawyerMessages = () => {
   };
 
   return (
-    <div className="h-screen bg-gray-50 flex overflow-hidden">
+    <div className="min-h-screen bg-gray-50 flex">
       <LawyerSidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col">
         <LawyerTopBar />
 
-        <main className="flex-1 p-4 lg:p-6 overflow-hidden">
-          <div className="max-w-7xl mx-auto h-full flex flex-col">
-            <div className="flex items-center justify-between mb-4 flex-shrink-0">
-              <h1 className="text-2xl lg:text-3xl font-bold text-navy">Messages</h1>
-              {location.state?.clientName && (
-                <div className="text-sm text-gray-600">
-                  Chatting with: <span className="font-medium">{location.state.clientName}</span>
-                </div>
-              )}
-            </div>
+        <main className="flex-1 p-4 lg:p-6">
+          <div className="max-w-7xl mx-auto h-full">
+            <h1 className="text-2xl lg:text-3xl font-bold text-navy mb-6">Messages</h1>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
               {/* Client List */}
-              <Card className="shadow-soft border-0 lg:col-span-1 flex flex-col">
+              <Card className="shadow-soft border-0 lg:col-span-1">
                 <CardHeader>
                   <CardTitle className="text-lg">Conversations</CardTitle>
                   <div className="relative">
@@ -174,8 +163,8 @@ const LawyerMessages = () => {
                     <Input placeholder="Search conversations..." className="pl-10" />
                   </div>
                 </CardHeader>
-                <CardContent className="p-0 flex-1 overflow-hidden">
-                  <div className="space-y-1 overflow-y-auto h-full">
+                <CardContent className="p-0">
+                  <div className="space-y-1">
                     {conversations.length === 0 && (
                       <div className="p-4 text-sm text-gray-500">No conversations yet</div>
                     )}
@@ -210,15 +199,15 @@ const LawyerMessages = () => {
               </Card>
 
               {/* Chat Area */}
-              <Card className="shadow-soft border-0 lg:col-span-2 flex flex-col min-h-0">
-                <CardHeader className="border-b border-gray-200 flex-shrink-0">
+              <Card className="shadow-soft border-0 lg:col-span-2 flex flex-col h-full">
+                <CardHeader className="border-b border-gray-200">
                   <CardTitle className="text-lg">
                     {selectedUserId ? 'Conversation' : 'Select a conversation'}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="flex-1 flex flex-col p-0 min-h-0 overflow-hidden">
+                <CardContent className="flex-1 flex flex-col p-0 min-h-0">
                   {/* Messages */}
-                  <div className="flex-1 p-4 space-y-4 overflow-y-auto min-h-0 messages-container">
+                  <div className="flex-1 p-4 space-y-4 overflow-y-auto min-h-0 messages-container max-h-[60vh]">
                     {loading && <div className="text-center text-gray-500">Loading...</div>}
                     {error && <div className="text-center text-red-600">{error}</div>}
                     {!selectedUserId ? (
@@ -262,7 +251,7 @@ const LawyerMessages = () => {
                   </div>
 
                   {/* Message Input */}
-                  <div className="border-t border-gray-200 p-4 flex-shrink-0 bg-white">
+                  <div className="border-t border-gray-200 p-4 flex-shrink-0">
                     <div className="flex gap-2">
                       <Input
                         value={message}

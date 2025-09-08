@@ -84,7 +84,7 @@ const LawyerFeedbackDialog: React.FC<LawyerFeedbackDialogProps> = ({
       if (response.ok && data.success) {
         toast({
           title: "Review Submitted",
-          description: "Thank you! Your review has been published and is now visible."
+          description: "Thank you! Your review will be published after approval."
         });
         
         // Reset form

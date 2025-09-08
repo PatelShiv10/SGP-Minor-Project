@@ -322,54 +322,6 @@ const LawyerDashboard = () => {
 
             {/* Reviews Section hidden as requested */}
 
-            {/* Recent Reviews Section */}
-            {dashboardStats?.recentReviews && dashboardStats.recentReviews.length > 0 && (
-              <Card className="shadow-soft border-0 mt-6">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg font-semibold text-navy">Recent Reviews</CardTitle>
-                    <Button asChild variant="outline" size="sm">
-                      <Link to="/lawyer-reviews">View All</Link>
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {dashboardStats.recentReviews.slice(0, 3).map((review, index) => (
-                      <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <div className="flex">
-                          {[1, 2, 3, 4, 5].map(star => (
-                            <Star 
-                              key={star}
-                              className={`h-4 w-4 ${
-                                star <= review.rating
-                                  ? 'text-yellow-500 fill-current'
-                                  : 'text-gray-300'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-gray-600 mb-1">
-                            <span className="font-medium">{review.clientName || 'Anonymous'}</span>
-                            <span className="text-gray-400 ml-2">
-                              {new Date(review.createdAt).toLocaleDateString()}
-                            </span>
-                          </p>
-                          <p className="text-gray-800 text-sm">{review.comment}</p>
-                          {!review.isApproved && (
-                            <Badge className="bg-yellow-100 text-yellow-800 text-xs mt-1">
-                              Pending Approval
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Quick Chat section hidden as requested */}
           </div>
         </main>

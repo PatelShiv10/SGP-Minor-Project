@@ -286,7 +286,7 @@ const LawyerClients = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <Button
             size="sm"
             variant="outline"
@@ -313,20 +313,6 @@ const LawyerClients = () => {
           >
             <FileText className="h-4 w-4 mr-1" />
             Files
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => navigate('/lawyer-documents', { 
-              state: { 
-                clientId: client.clientId._id,
-                clientName: formatClientName(client)
-              } 
-            })}
-            className="w-full border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white"
-          >
-            <FileText className="h-4 w-4 mr-1" />
-            Docs
           </Button>
         </div>
       </CardContent>
