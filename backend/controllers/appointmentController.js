@@ -1,5 +1,6 @@
 const Booking = require('../models/Booking');
 const User = require('../models/User');
+const LawyerFeedback = require('../models/LawyerFeedback');
 const LawyerClient = require('../models/LawyerClient');
 const { validationResult } = require('express-validator');
 
@@ -243,6 +244,19 @@ const getDashboardStats = async (req, res) => {
       type: 'booking'
     }));
 
+    // Recent reviews (show immediately, regardless of approval)
+    let recentReviews = [];
+    try {
+      recentReviews = await LawyerFeedback.find({ lawyerId })
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .select('rating comment clientName createdAt isApproved response')
+        .lean();
+    } catch (e) {
+      // non-fatal
+      recentReviews = [];
+    }
+
     res.json({
       success: true,
       data: {
@@ -250,7 +264,8 @@ const getDashboardStats = async (req, res) => {
         thisMonthAppointments: thisMonthCount,
         pendingAppointments: pendingCount,
         completedAppointments: completedCount,
-        recentActivity: activities
+        recentActivity: activities,
+        recentReviews
       }
     });
 
