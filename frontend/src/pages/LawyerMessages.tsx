@@ -1,5 +1,4 @@
-
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,8 +8,20 @@ import { LawyerSidebar } from '@/components/lawyer/LawyerSidebar';
 import { LawyerTopBar } from '@/components/lawyer/LawyerTopBar';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface Message { _id: string; sender: 'user'|'lawyer'; text: string; createdAt: string }
-interface ConversationPreview { userId: string; name: string; unread: number; lastMessage?: string; lastTime?: string }
+interface Message {
+  _id: string;
+  sender: 'user' | 'lawyer';
+  text: string;
+  createdAt: string;
+}
+
+interface ConversationPreview {
+  userId: string;
+  name: string;
+  unread: number;
+  lastMessage?: string;
+  lastTime?: string;
+}
 
 const LawyerMessages = () => {
   const [currentPage, setCurrentPage] = useState('messages');
@@ -30,14 +41,12 @@ const LawyerMessages = () => {
       endRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
-  
+
   useEffect(() => {
-    // Only auto-scroll if user is near the bottom or if it's a new message
     const messagesContainer = document.querySelector('.messages-container');
     if (messagesContainer) {
       const { scrollTop, scrollHeight, clientHeight } = messagesContainer;
       const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
-      
       if (isNearBottom || messages.length === 0) {
         scrollToBottom();
       }
@@ -50,7 +59,7 @@ const LawyerMessages = () => {
       try {
         const token = localStorage.getItem('token');
         const res = await fetch('http://localhost:5000/api/chat/conversations', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error('Failed to load conversations');
         const data = await res.json();
@@ -58,8 +67,8 @@ const LawyerMessages = () => {
         if (!selectedUserId && data.data.length > 0) {
           setSelectedUserId(data.data[0].userId);
         }
-      } catch (e) {
-        // keep empty list
+      } catch {
+        // ignore
       }
     };
     loadConversations();
@@ -73,23 +82,29 @@ const LawyerMessages = () => {
         setError(null);
         const token = localStorage.getItem('token');
         const params = new URLSearchParams({ lawyerId, userId: selectedUserId });
-        const res = await fetch(`http://localhost:5000/api/chat/conversation?${params.toString()}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const res = await fetch(
+          `http://localhost:5000/api/chat/conversation?${params.toString()}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         if (!res.ok) throw new Error('Failed to fetch conversation');
         const data = await res.json();
         setMessages(data.data);
-        // Refresh conversation list to update unread counts
+
+        // refresh list
         try {
           const listRes = await fetch('http://localhost:5000/api/chat/conversations', {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
           });
           if (listRes.ok) {
             const listData = await listRes.json();
             setConversations(listData.data);
           }
-        } catch {}
-      } catch (e) {
+        } catch {
+          // ignore
+        }
+      } catch {
         setError('Failed to load conversation');
       } finally {
         setLoading(false);
@@ -100,21 +115,29 @@ const LawyerMessages = () => {
 
   const handleSendMessage = async () => {
     if (!message.trim() || !lawyerId || !selectedUserId) return;
-    const optimistic: Message = { _id: 'temp-' + Date.now(), sender: 'lawyer', text: message, createdAt: new Date().toISOString() };
-    setMessages(prev => [...prev, optimistic]);
+    const optimistic: Message = {
+      _id: 'temp-' + Date.now(),
+      sender: 'lawyer',
+      text: message,
+      createdAt: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, optimistic]);
     setMessage('');
     try {
       const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:5000/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ lawyerId, userId: selectedUserId, text: optimistic.text })
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ lawyerId, userId: selectedUserId, text: optimistic.text }),
       });
       if (!res.ok) throw new Error('Failed to send');
       const { data } = await res.json();
-      setMessages(prev => prev.map(m => m._id === optimistic._id ? data : m));
-    } catch (e) {
-      setMessages(prev => prev.filter(m => m._id !== optimistic._id));
+      setMessages((prev) => prev.map((m) => (m._id === optimistic._id ? data : m)));
+    } catch {
+      setMessages((prev) => prev.filter((m) => m._id !== optimistic._id));
       alert('Failed to send message');
     }
   };
@@ -122,10 +145,10 @@ const LawyerMessages = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <LawyerSidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
-      
+
       <div className="flex-1 flex flex-col">
         <LawyerTopBar />
-        
+
         <main className="flex-1 p-4 lg:p-6">
           <div className="max-w-7xl mx-auto h-full">
             <h1 className="text-2xl lg:text-3xl font-bold text-navy mb-6">Messages</h1>
@@ -150,15 +173,21 @@ const LawyerMessages = () => {
                         key={client.userId}
                         onClick={() => setSelectedUserId(client.userId)}
                         className={`w-full p-4 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 ${
-                          selectedUserId === client.userId ? 'bg-teal-50 border-l-4 border-l-teal' : ''
+                          selectedUserId === client.userId
+                            ? 'bg-teal-50 border-l-4 border-l-teal'
+                            : ''
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <h3 className="font-medium text-navy">{client.name}</h3>
                           <div className="flex items-center space-x-2">
-                            <span className="text-xs text-gray-500">{client.lastTime ? new Date(client.lastTime).toLocaleString() : ''}</span>
+                            <span className="text-xs text-gray-500">
+                              {client.lastTime ? new Date(client.lastTime).toLocaleString() : ''}
+                            </span>
                             {client.unread > 0 && (
-                              <Badge className="bg-red-500 text-white text-xs">{client.unread}</Badge>
+                              <Badge className="bg-red-500 text-white text-xs">
+                                {client.unread}
+                              </Badge>
                             )}
                           </div>
                         </div>
@@ -188,18 +217,29 @@ const LawyerMessages = () => {
                     ) : (
                       <>
                         {messages.map((msg) => (
-                          <div key={msg._id} className={`flex ${msg.sender === 'lawyer' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[70%] ${msg.sender === 'lawyer' ? 'order-2' : 'order-1'}`}>
-                              <div className={`p-4 rounded-lg ${
-                                msg.sender === 'lawyer' 
-                                  ? 'bg-teal text-white' 
-                                  : 'bg-gray-100'
-                              }`}>
+                          <div
+                            key={msg._id}
+                            className={`flex ${
+                              msg.sender === 'lawyer' ? 'justify-end' : 'justify-start'
+                            }`}
+                          >
+                            <div
+                              className={`max-w-[70%] ${
+                                msg.sender === 'lawyer' ? 'order-2' : 'order-1'
+                              }`}
+                            >
+                              <div
+                                className={`p-4 rounded-lg ${
+                                  msg.sender === 'lawyer' ? 'bg-teal text-white' : 'bg-gray-100'
+                                }`}
+                              >
                                 <p className="leading-relaxed">{msg.text}</p>
                               </div>
-                              <div className={`text-xs text-gray-500 mt-1 ${
-                                msg.sender === 'lawyer' ? 'text-right' : 'text-left'
-                              }`}>
+                              <div
+                                className={`text-xs text-gray-500 mt-1 ${
+                                  msg.sender === 'lawyer' ? 'text-right' : 'text-left'
+                                }`}
+                              >
                                 {new Date(msg.createdAt).toLocaleTimeString()}
                               </div>
                             </div>
@@ -216,7 +256,11 @@ const LawyerMessages = () => {
                       <Input
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
+                        onKeyPress={(e) =>
+                          e.key === 'Enter' &&
+                          !e.shiftKey &&
+                          (e.preventDefault(), handleSendMessage())
+                        }
                         placeholder="Type your message..."
                         className="flex-1 border-gray-300 focus:border-teal focus:ring-teal"
                         disabled={!selectedUserId}
@@ -228,8 +272,7 @@ const LawyerMessages = () => {
                       >
                         <Send className="h-4 w-4" />
                       </Button>
-                        </div>
-                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
