@@ -5,12 +5,10 @@ const {
   createLawyerFeedback,
   getLawyerFeedback,
   getLawyerFeedbackSummary,
-  getPendingFeedback,
-  approveFeedback,
   respondToFeedback,
   markFeedbackHelpful
 } = require('../controllers/lawyerFeedbackController');
-const { protect, admin, lawyer } = require('../middlewares/authMiddleware');
+const { protect, lawyer } = require('../middlewares/authMiddleware');
 
 // Validation middleware for creating feedback
 const validateFeedback = [
@@ -49,7 +47,7 @@ const validateResponse = [
     .withMessage('Response message must be between 5 and 500 characters')
 ];
 
-// Create new feedback requires auth to bind to user
+// Create new feedback (auth required)
 router.post('/', protect, validateFeedback, createLawyerFeedback);
 
 // Get feedback for a specific lawyer (public)
@@ -61,11 +59,7 @@ router.get('/lawyer/:lawyerId/summary', getLawyerFeedbackSummary);
 // Mark feedback as helpful (public)
 router.put('/:id/helpful', markFeedbackHelpful);
 
-// Protected routes - Lawyer only
+// Lawyer responds to feedback (optional)
 router.put('/:id/respond', protect, lawyer, validateResponse, respondToFeedback);
-
-// Protected routes - Admin only
-router.get('/pending', protect, admin, getPendingFeedback);
-router.put('/:id/approve', protect, admin, approveFeedback);
 
 module.exports = router;

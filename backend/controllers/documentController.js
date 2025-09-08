@@ -5,9 +5,9 @@ const fs = require('fs').promises;
 const path = require('path');
 const { validationResult } = require('express-validator');
 
-// @desc    Upload a new document
-// @route   POST /api/documents/upload
-// @access  Private/Lawyer
+// @desc Upload a new document
+// @route POST /api/documents/upload
+// @access Private/Lawyer
 const uploadDocument = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -88,9 +88,9 @@ const uploadDocument = async (req, res) => {
   }
 };
 
-// @desc    Get all documents for a lawyer
-// @route   GET /api/documents/lawyer
-// @access  Private/Lawyer
+// @desc Get all documents for a lawyer
+// @route GET /api/documents/lawyer
+// @access Private/Lawyer
 const getLawyerDocuments = async (req, res) => {
   try {
     const lawyerId = req.user.id;
@@ -107,19 +107,19 @@ const getLawyerDocuments = async (req, res) => {
 
     // Build query
     const query = { lawyerId };
-    
+
     if (status && status !== 'all') {
       query.status = status;
     }
-    
+
     if (documentType && documentType !== 'all') {
       query.documentType = documentType;
     }
-    
+
     if (clientId && clientId !== 'all') {
       query.clientId = clientId;
     }
-    
+
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -173,9 +173,9 @@ const getLawyerDocuments = async (req, res) => {
   }
 };
 
-// @desc    Get documents for a specific client
-// @route   GET /api/documents/client/:clientId
-// @access  Private/Lawyer
+// @desc Get documents for a specific client
+// @route GET /api/documents/client/:clientId
+// @access Private/Lawyer
 const getClientDocuments = async (req, res) => {
   try {
     const { clientId } = req.params;
@@ -190,30 +190,30 @@ const getClientDocuments = async (req, res) => {
       sortOrder = 'desc'
     } = req.query;
 
-    // Verify client relationship
+    // ✅ FIXED: Verify client relationship exists
     const clientRelationship = await LawyerClient.findOne({
       lawyerId,
-      'clientId._id': clientId
+      clientId: clientId  // Fixed: removed the incorrect 'clientId._id' reference
     });
 
     if (!clientRelationship) {
       return res.status(404).json({
         success: false,
-        message: 'Client relationship not found'
+        message: 'Client relationship not found. Please add this client to your client list first.'
       });
     }
 
     // Build query
     const query = { lawyerId, clientId };
-    
+
     if (status && status !== 'all') {
       query.status = status;
     }
-    
+
     if (documentType && documentType !== 'all') {
       query.documentType = documentType;
     }
-    
+
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -254,7 +254,12 @@ const getClientDocuments = async (req, res) => {
           hasNext: skip + documents.length < total,
           hasPrev: parseInt(page) > 1
         },
-        stats
+        stats,
+        clientInfo: {
+          relationshipStatus: clientRelationship.status,
+          caseType: clientRelationship.caseType,
+          caseTitle: clientRelationship.caseTitle
+        }
       }
     });
 
@@ -267,9 +272,9 @@ const getClientDocuments = async (req, res) => {
   }
 };
 
-// @desc    Get document by ID
-// @route   GET /api/documents/:id
-// @access  Private/Lawyer
+// @desc Get document by ID
+// @route GET /api/documents/:id
+// @access Private/Lawyer
 const getDocumentById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -305,9 +310,9 @@ const getDocumentById = async (req, res) => {
   }
 };
 
-// @desc    Update document
-// @route   PUT /api/documents/:id
-// @access  Private/Lawyer
+// @desc Update document
+// @route PUT /api/documents/:id
+// @access Private/Lawyer
 const updateDocument = async (req, res) => {
   try {
     const { id } = req.params;
@@ -370,9 +375,9 @@ const updateDocument = async (req, res) => {
   }
 };
 
-// @desc    Delete document
-// @route   DELETE /api/documents/:id
-// @access  Private/Lawyer
+// @desc Delete document
+// @route DELETE /api/documents/:id
+// @access Private/Lawyer
 const deleteDocument = async (req, res) => {
   try {
     const { id } = req.params;
@@ -412,9 +417,9 @@ const deleteDocument = async (req, res) => {
   }
 };
 
-// @desc    Download document
-// @route   GET /api/documents/:id/download
-// @access  Private/Lawyer
+// @desc Download document
+// @route GET /api/documents/:id/download
+// @access Private/Lawyer
 const downloadDocument = async (req, res) => {
   try {
     const { id } = req.params;
@@ -456,9 +461,9 @@ const downloadDocument = async (req, res) => {
   }
 };
 
-// @desc    Get document statistics
-// @route   GET /api/documents/stats
-// @access  Private/Lawyer
+// @desc Get document statistics
+// @route GET /api/documents/stats
+// @access Private/Lawyer
 const getDocumentStats = async (req, res) => {
   try {
     const lawyerId = req.user.id;
