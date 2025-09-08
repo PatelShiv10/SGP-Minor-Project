@@ -120,19 +120,19 @@ const LawyerMessages = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen h-screen overflow-hidden bg-gray-50 flex">
       <LawyerSidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
       
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <LawyerTopBar />
         
-        <main className="flex-1 p-4 lg:p-6">
-          <div className="max-w-7xl mx-auto h-full">
+        <main className="flex-1 p-4 lg:p-6 overflow-hidden">
+          <div className="max-w-7xl mx-auto h-full overflow-hidden">
             <h1 className="text-2xl lg:text-3xl font-bold text-navy mb-6">Messages</h1>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)] overflow-hidden">
               {/* Client List */}
-              <Card className="shadow-soft border-0 lg:col-span-1">
+              <Card className="shadow-soft border-0 lg:col-span-1 h-full overflow-hidden">
                 <CardHeader>
                   <CardTitle className="text-lg">Conversations</CardTitle>
                   <div className="relative">
@@ -140,8 +140,8 @@ const LawyerMessages = () => {
                     <Input placeholder="Search conversations..." className="pl-10" />
                   </div>
                 </CardHeader>
-                <CardContent className="p-0">
-                  <div className="space-y-1">
+                <CardContent className="p-0 h-full overflow-hidden">
+                  <div className="space-y-1 h-full overflow-y-auto">
                     {conversations.length === 0 && (
                       <div className="p-4 text-sm text-gray-500">No conversations yet</div>
                     )}
@@ -170,7 +170,7 @@ const LawyerMessages = () => {
               </Card>
 
               {/* Chat Area */}
-              <Card className="shadow-soft border-0 lg:col-span-2 flex flex-col h-full">
+              <Card className="shadow-soft border-0 lg:col-span-2 flex flex-col h-full overflow-hidden">
                 <CardHeader className="border-b border-gray-200">
                   <CardTitle className="text-lg">
                     {selectedUserId ? 'Conversation' : 'Select a conversation'}
